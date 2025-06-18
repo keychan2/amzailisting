@@ -93,16 +93,16 @@
 <body>
   <h1>AI Listing Generator</h1>
   <div class="input-group">
-    <label for="titles">参考竞品标题（最多5个，每行一个）</label>
-    <textarea id="titles" rows="5" placeholder="请输入参考标题，每行一个"></textarea>
+    <label for="titles">参考竞品标题（建议不同标题进行换行）</label>
+    <textarea id="titles" rows="5" placeholder="请输入竞品标题，数量不限"></textarea>
   </div>
   <div class="input-group">
-    <label for="bullets">参考竞品五点描述（最多5个，每段一个）</label>
-    <textarea id="bullets" rows="5" placeholder="请输入参考五点描述，每段一个"></textarea>
+    <label for="bullets">参考竞品五点描述（建议每点描述进行换行）</label>
+    <textarea id="bullets" rows="5" placeholder="请输入竞品描述，数量不限"></textarea>
   </div>
   <div class="input-group">
     <label for="features">产品特性（选填）</label>
-    <textarea id="features" rows="3" placeholder="如材质、容量、是否有漏嘴等"></textarea>
+    <textarea id="features" rows="3" placeholder="如材质、特性、尺寸大小等"></textarea>
   </div>
   <div class="input-group">
     <label for="keywords">关键词（选填）</label>
@@ -125,7 +125,23 @@
         return;
       }
 
-      const prompt = `请参考以下竞品信息，生成一个高质量的亚马逊产品标题和五点描述，突出卖点并优化关键词：\n\n参考标题：\n${titles}\n\n参考五点：\n${bullets}\n\n产品特性：\n${features}\n\n关键词：\n${keywords}\n\n请以英文输出。`;
+      const prompt = `Based on the following reference content, generate an engaging and SEO-optimized Amazon product title and five bullet points. Learn from the reference styles, highlight unique selling points, and include relevant keywords naturally.
+
+        Reference Content:
+        ${titles}
+
+        Product Features (Optional):
+        ${features}
+
+        Target Keywords (Optional):
+        ${keywords}
+
+        Requirements:
+        - Output in English
+        - Title should be concise, keyword-rich, and within 200 characters
+        - Bullet points should highlight key benefits, features, and usage scenarios (max 5 points)
+        - Use clear, persuasive, and professional language
+        - 标题和描述不要加如何表情符号`;
 
       document.getElementById("result").textContent = "正在生成中，请稍候...";
 
