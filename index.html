@@ -3,10 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Listing Generator</title>
+  <title>亚马逊Listing极速生成器 | Amazon Listing Generator</title>
+  <meta name="description" content="免费在线工具，一键生成亚马逊产品标题和五点描述，支持关键词优化，适用于跨境卖家、Amazon运营。" />
+  <meta name="keywords" content="亚马逊Listing生成器, Amazon五点描述, 标题优化, Listing优化, 跨境电商工具" />
   <style>
     :root {
-      --primary-color: #007aff; /* Apple 蓝 */
+      --primary-color: #007aff;
+      --gradient-start: #6a11cb;
+      --gradient-end: #2575fc;
       --bg-light: #f5f5f7;
       --bg-white: #ffffff;
       --text-main: #1c1c1e;
@@ -14,26 +18,65 @@
       --border-color: #d1d1d6;
     }
 
-    body {
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background-color: var(--bg-light);
       color: var(--text-main);
-      padding: 20px;
-      max-width: 800px;
-      margin: auto;
     }
 
-    h1 {
+    header {
+      background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+      color: white;
+      padding: 40px 20px;
       text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 32px;
+    }
+
+    main {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding: 20px;
+      height: calc(100% - 160px);
+    }
+
+    @media (min-width: 900px) {
+      main {
+        flex-direction: row;
+        justify-content: center;
+        align-items: stretch;
+      }
+    }
+
+    .column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      background-color: var(--bg-white);
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    h2 {
       color: var(--primary-color);
-      margin-bottom: 30px;
+      margin-bottom: 16px;
+      font-size: 20px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
     }
 
     label {
       font-weight: 600;
       margin-bottom: 5px;
       display: block;
-      color: var(--text-main);
     }
 
     textarea, input {
@@ -42,36 +85,31 @@
       margin-bottom: 15px;
       border-radius: 12px;
       border: 1px solid var(--border-color);
-      background-color: var(--bg-white);
       font-size: 16px;
+      background-color: var(--bg-light);
       color: var(--text-main);
-      transition: border 0.3s;
+      box-sizing: border-box;
     }
 
     textarea:focus, input:focus {
-      border-color: var(--primary-color);
       outline: none;
+      border-color: var(--primary-color);
     }
 
     button {
       background-color: var(--primary-color);
       color: white;
-      padding: 12px 20px;
+      padding: 12px 24px;
       border: none;
       border-radius: 12px;
       font-size: 16px;
       cursor: pointer;
-      display: block;
-      margin: 0 auto 30px;
       transition: background-color 0.3s;
+      align-self: flex-start;
     }
 
     button:hover {
       background-color: #005fcc;
-    }
-
-    .input-group {
-      margin-bottom: 25px;
     }
 
     .result {
@@ -81,37 +119,43 @@
       border-radius: 16px;
       border: 1px solid var(--border-color);
       box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    }
-
-    h2 {
-      color: var(--text-secondary);
-      text-align: center;
-      margin-bottom: 10px;
+      flex: 1;
     }
   </style>
 </head>
 <body>
-  <h1>AI Listing Generator</h1>
-  <div class="input-group">
-    <label for="titles">参考竞品标题（建议不同标题进行换行）</label>
-    <textarea id="titles" rows="5" placeholder="请输入竞品标题，数量不限"></textarea>
-  </div>
-  <div class="input-group">
-    <label for="bullets">参考竞品五点描述（建议每点描述进行换行）</label>
-    <textarea id="bullets" rows="5" placeholder="请输入竞品描述，数量不限"></textarea>
-  </div>
-  <div class="input-group">
-    <label for="features">产品特性（选填）</label>
-    <textarea id="features" rows="3" placeholder="如材质、特性、尺寸大小等"></textarea>
-  </div>
-  <div class="input-group">
-    <label for="keywords">关键词（选填）</label>
-    <input type="text" id="keywords" placeholder="以英文逗号分隔，例如 matcha bowl, spout, ceramic" />
-  </div>
-  <button onclick="generateListing()">生成标题与五点</button>
+  <header>
+    <h1>亚马逊Listing极速生成器</h1>
+  </header>
 
-  <h2>生成结果</h2>
-  <div id="result" class="result">等待生成...</div>
+  <main>
+    <div class="column">
+      <h2>输入内容</h2>
+
+      <div class="input-group">
+        <label for="titles">参考竞品标题（建议不同标题进行换行）</label>
+        <textarea id="titles" rows="5" placeholder="请输入竞品标题，数量不限"></textarea>
+      </div>
+
+      <div class="input-group">
+        <label for="bullets">参考竞品五点描述（建议每点描述进行换行）</label>
+        <textarea id="bullets" rows="5" placeholder="请输入竞品描述，数量不限"></textarea>
+      </div>
+
+      <label for="features">产品特性（选填）</label>
+      <textarea id="features" rows="3" placeholder="如材质、容量、是否有漏嘴等"></textarea>
+
+      <label for="keywords">关键词（选填）</label>
+      <input type="text" id="keywords" placeholder="以英文逗号分隔，例如 matcha bowl, spout, ceramic" />
+
+      <button onclick="generateListing()">生成标题与五点</button>
+    </div>
+
+    <div class="column">
+      <h2>生成结果</h2>
+      <div id="result" class="result">等待生成...</div>
+    </div>
+  </main>
 
   <script>
     async function generateListing() {
@@ -121,27 +165,11 @@
       const keywords = document.getElementById("keywords").value.trim();
 
       if (!titles && !bullets) {
-        document.getElementById("result").textContent = "请至少填写一个标题或五点描述。";
+        document.getElementById("result").textContent = "请至少填写参考竞品标题或五点描述。";
         return;
       }
 
-      const prompt = `Based on the following reference content, generate an engaging and SEO-optimized Amazon product title and five bullet points. Learn from the reference styles, highlight unique selling points, and include relevant keywords naturally.
-
-        Reference Content:
-        ${titles}
-
-        Product Features (Optional):
-        ${features}
-
-        Target Keywords (Optional):
-        ${keywords}
-
-        Requirements:
-        - Output in English
-        - Title should be concise, keyword-rich, and within 200 characters
-        - Bullet points should highlight key benefits, features, and usage scenarios (max 5 points)
-        - Use clear, persuasive, and professional language
-        - 标题和描述不要加如何表情符号`;
+      const prompt = `Based on the following reference Amazon titles and bullet points, generate a compelling, keyword-optimized product title and 5 persuasive bullet points.\n\nReference Titles:\n${titles}\n\nReference Bullets:\n${bullets}\n\nProduct Features:\n${features}\n\nTarget Keywords:\n${keywords}\n\nInstructions:\n- Output in English\n- Title: concise, clear, max 200 characters\n- Bullet Points: focus on product benefits, features, and usability (5 points total)\n- Use professional, persuasive tone suitable for Amazon customers.`;
 
       document.getElementById("result").textContent = "正在生成中，请稍候...";
 
@@ -152,7 +180,6 @@
       });
 
       const data = await res.json();
-      document.getElementById("result").textContent = "正在生成中，请稍候...";  
       document.getElementById("result").textContent = data.choices?.[0]?.message?.content || "生成失败，请检查 API 返回内容";
     }
   </script>
