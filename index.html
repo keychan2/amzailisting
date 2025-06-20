@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>亚马逊Listing极速AI生成器 | Amazon Listing Generator</title>
+  <title>亚马逊Listing极速生成器 | Amazon Listing Generator</title>
   <meta name="description" content="免费在线工具，一键生成亚马逊产品标题和五点描述，支持关键词优化，适用于跨境卖家、Amazon运营。" />
   <meta name="keywords" content="亚马逊Listing生成器, Amazon五点描述, 标题优化, Listing优化, 跨境电商工具" />
   <style>
@@ -59,12 +59,12 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      padding: 20px;
+      justify-content: center; /* 垂直居中 */
+      padding: 40px 20px;
       background-color: var(--bg-white);
       border-radius: 16px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
-
     h2 {
       color: var(--primary-color);
       margin-bottom: 16px;
@@ -106,6 +106,8 @@
       cursor: pointer;
       transition: background-color 0.3s;
       align-self: flex-start;
+      margin-top: 24px;
+
     }
 
     button:hover {
@@ -121,11 +123,39 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.05);
       flex: 1;
     }
+    .custom-select-wrapper {
+  position: relative;
+}
+
+.custom-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: var(--bg-light);
+  border: 1px solid var(--border-color);
+  padding: 12px;
+  font-size: 16px;
+  color: var(--text-main);
+  border-radius: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 8L10 12L14 8' stroke='%23636366' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  transition: border-color 0.3s ease;
+}
+
+.custom-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  background-color: var(--bg-white);
+}
   </style>
 </head>
 <body>
   <header>
-    <h1>亚马逊Listing极速AI生成器</h1>
+    <h1>亚马逊Listing极速生成器</h1>
   </header>
 
   <main>
@@ -143,12 +173,23 @@
       </div>
 
       <label for="features">产品特性（选填）</label>
-      <textarea id="features" rows="3" placeholder="如材质、特性、尺寸大小等（与竞品有差异的特性）"></textarea>
+      <textarea id="features" rows="3" placeholder="如材质、容量、是否有漏嘴等"></textarea>
 
       <label for="keywords">关键词（选填）</label>
-      <input type="text" id="keywords" placeholder="以英文逗号分隔，例如 phone case, iphone, black" />
+      <input type="text" id="keywords" placeholder="以英文逗号分隔，例如 matcha bowl, spout, ceramic" />
 
-      <button onclick="generateListing()">生成标题与五点</button>
+       <div class="input-group">
+      <label for="model">选择模型</label>
+      <div class="custom-select-wrapper">
+        <select id="model" class="custom-select">
+          <option value="deepseek">DeepSeek</option>
+          <option value="chatgpt">ChatGPT</option>
+        </select>
+      </div>
+    </div>
+
+
+      <button onclick="generateListing()" style="align-self: center;">立即生成</button>
     </div>
 
     <div class="column">
@@ -158,30 +199,31 @@
   </main>
 
   <script>
-    async function generateListing() {
-      const titles = document.getElementById("titles").value.trim();
-      const bullets = document.getElementById("bullets").value.trim();
-      const features = document.getElementById("features").value.trim();
-      const keywords = document.getElementById("keywords").value.trim();
+   async function generateListing() {
+  const titles = document.getElementById("titles").value.trim();
+  const bullets = document.getElementById("bullets").value.trim();
+  const features = document.getElementById("features").value.trim();
+  const keywords = document.getElementById("keywords").value.trim();
+  const model = document.getElementById("model").value;
 
-      if (!titles && !bullets) {
-        document.getElementById("result").textContent = "请至少填写参考竞品标题或五点描述。";
-        return;
-      }
+  if (!titles && !bullets) {
+    document.getElementById("result").textContent = "请至少填写参考竞品标题或五点描述。";
+    return;
+  }
 
-      const prompt = `Based on the following reference Amazon titles and bullet points, generate a compelling, keyword-optimized product title and 5 persuasive bullet points.\n\nReference Titles:\n${titles}\n\nReference Bullets:\n${bullets}\n\nProduct Features:\n${features}\n\nTarget Keywords:\n${keywords}\n\nInstructions:\n- Output in English\n- Title: concise, clear, max 200 characters\n- Bullet Points: focus on product benefits, features, and usability (5 points total)\n- Use professional, persuasive tone suitable for Amazon customers.`;
+  const prompt = `Based on the following reference Amazon titles and bullet points, generate a compelling, keyword-optimized product title and 5 persuasive bullet points.\n\nReference Titles:\n${titles}\n\nReference Bullets:\n${bullets}\n\nProduct Features:\n${features}\n\nTarget Keywords:\n${keywords}\n\nInstructions:\n- Output in English\n- Title: concise, clear, max 200 characters\n- Bullet Points: focus on product benefits, features, and usability (5 points total)\n- Use professional, persuasive tone suitable for Amazon customers.`;
 
-      document.getElementById("result").textContent = "正在生成中，请稍候...";
+  document.getElementById("result").textContent = "正在生成中，请稍候...";
 
-      const res = await fetch("https://listing-ai.gskanchan.workers.dev", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt })
-      });
+  const res = await fetch("https://listing-ai.gskanchan.workers.dev", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ prompt, model }) // ← 加上 model 字段
+  });
 
-      const data = await res.json();
-      document.getElementById("result").textContent = data.choices?.[0]?.message?.content || "生成失败，请检查 API 返回内容";
-    }
+  const data = await res.json();
+  document.getElementById("result").textContent = data.choices?.[0]?.message?.content || "生成失败，请检查 API 返回内容";
+}
   </script>
 </body>
 </html>
