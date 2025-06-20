@@ -194,7 +194,7 @@
 
     <div class="column">
       <h2>生成结果</h2>
-      <div id="result" class="result">等待生成，约需30秒...</div>
+      <div id="result" class="result">请输入内容点击生成...</div>
     </div>
   </main>
 
@@ -213,7 +213,7 @@
 
   const prompt = `Based on the following reference Amazon titles and bullet points, generate a compelling, keyword-optimized product title and 5 persuasive bullet points.\n\nReference Titles:\n${titles}\n\nReference Bullets:\n${bullets}\n\nProduct Features:\n${features}\n\nTarget Keywords:\n${keywords}\n\nInstructions:\n- Output in English\n- Title: concise, clear, max 200 characters\n- Bullet Points: focus on product benefits, features, and usability (5 points total)\n- Use professional, persuasive tone suitable for Amazon customers.`;
 
-  document.getElementById("result").textContent = "正在生成中，请稍候...";
+  document.getElementById("result").textContent = "正在生成中，约需30秒...";
 
   const res = await fetch("https://listing-ai.gskanchan.workers.dev", {
     method: "POST",
