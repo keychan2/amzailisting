@@ -165,6 +165,58 @@
   content: '';
   animation: blinkDots 1.2s steps(3, end) infinite;
 }
+
+.site-footer {
+  background: linear-gradient(90deg, #6a11cb, #2575fc); /* 渐变背景 */
+  padding: 24px 16px;
+  text-align: center;
+  color: white; /* 白色字体 */
+  font-size: 14px;
+  border-top: none;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  margin-top: 40px;
+  border-radius: 12px 12px 0 0;
+}
+
+.site-footer a {
+  color: #ffffff;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.site-footer a:hover {
+  text-decoration: none;
+  opacity: 0.9;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 999;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 720px;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.close-button {
+  position: absolute;
+  top: 10px; right: 14px;
+  font-size: 40px;
+  cursor: pointer;
+}
+
   </style>
 </head>
 <body>
@@ -238,6 +290,32 @@
   const data = await res.json();
   document.getElementById("result").textContent = data.choices?.[0]?.message?.content || "生成失败，请检查 API 返回内容";
 }
+
+  function openModal() {
+    document.getElementById("feedbackModal").style.display = "flex";
+  }
+  function closeModal() {
+    document.getElementById("feedbackModal").style.display = "none";
+  }
+
   </script>
+
+<footer class="site-footer">
+  <div class="footer-content">
+    <p>© 2025 亚马逊 Listing 极速生成器</p>
+    <p>
+      📧 <a href="mailto:gskanchan@163.com">发送邮件联系我</a> |
+      💬 <a href="javascript:void(0);" onclick="openModal()">提交反馈</a>
+    </p>
+  </div>
+</footer>
+
+<div id="feedbackModal" class="modal">
+  <div class="modal-content">
+    <span class="close-button" onclick="closeModal()">×</span>
+    <iframe src="https://uqi0gjbiwfl.feishu.cn/share/base/form/shrcn0RZevoq7QLVvGN6U5gojqb"
+            frameborder="0" width="100%" height="500" style="border-radius: 12px;"></iframe>
+  </div>
+</div>
 </body>
 </html>
