@@ -217,6 +217,50 @@
   cursor: pointer;
 }
 
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 999;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.4);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 16px;
+  text-align: center;
+  max-width: 360px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  position: relative;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.donate-button {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  background: linear-gradient(90deg, #ff6a00, #ee0979);
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+
   </style>
 </head>
 <body>
@@ -298,6 +342,13 @@
     document.getElementById("feedbackModal").style.display = "none";
   }
 
+function openDonate() {
+  document.getElementById("donateModal").style.display = "flex";
+}
+function closeDonate() {
+  document.getElementById("donateModal").style.display = "none";
+}
+
   </script>
 
 <footer class="site-footer">
@@ -317,5 +368,17 @@
             frameborder="0" width="100%" height="500" style="border-radius: 12px;"></iframe>
   </div>
 </div>
+
+<div id="donateModal" class="modal">
+  <div class="modal-content">
+    <span class="close-button" onclick="closeDonate()">×</span>
+    <h3>☕ 请我喝杯奶茶吧！</h3>
+    <img src="donate.png" alt="打赏二维码" style="max-width: 300px; width: 100%; border-radius: 10px;"/>
+    <p style="margin-top: 10px;">长按或扫码支付，感谢你的支持！🥰</p>
+  </div>
+</div>
+
+<button onclick="openDonate()" class="donate-button">💗 请我喝奶茶</button>
+
 </body>
 </html>
