@@ -71,11 +71,11 @@
       box-shadow: 0 4px 16px rgba(0,122,255,0.10);
       border-color: var(--primary-color);
     }
-    .nav-btn:hover {
+    .nav-btn:hover:not(.active) {
       box-shadow: 0 6px 20px rgba(0,122,255,0.13);
       border-color: var(--primary-color);
       color: var(--primary-color);
-      background: #f5f5f7;
+      background: rgba(0,122,255,0.1);
     }
     main {
       display: flex;
@@ -227,7 +227,8 @@
       padding: 20px;
       border-radius: 16px;
       text-align: center;
-      max-width: 360px;
+      max-width: 800px;
+      width: 90%;
       box-shadow: 0 10px 30px rgba(0,0,0,0.2);
       position: relative;
     }
@@ -287,7 +288,7 @@
     <div class="modal-content">
       <span class="close-button" onclick="closeModal()">×</span>
       <iframe src="https://uqi0gjbiwfl.feishu.cn/share/base/form/shrcn0RZevoq7QLVvGN6U5gojqb"
-              frameborder="0" width="100%" height="500" style="border-radius: 12px;"></iframe>
+              frameborder="0" width="100%" height="700" style="border-radius: 12px;"></iframe>
     </div>
   </div>
   <div id="donateModal" class="modal">
@@ -417,6 +418,23 @@
         html += `</p>`;
       });
       document.getElementById('result').innerHTML = html;
+    }
+
+    // Modal related functions
+    function openModal() {
+      document.getElementById("feedbackModal").style.display = "flex";
+    }
+    
+    function closeModal() {
+      document.getElementById("feedbackModal").style.display = "none";
+    }
+
+    function openDonate() {
+      document.getElementById("donateModal").style.display = "flex";
+    }
+    
+    function closeDonate() {
+      document.getElementById("donateModal").style.display = "none";
     }
   </script>
 </body>
