@@ -252,15 +252,17 @@
   <main>
     <div class="card">
       <p>基于全组合优化算法，自动选择最佳装箱模板，支持亚马逊分仓规则。</p>
-      <label>📏 纸箱尺寸（cm）：</label>
+      <label>📦 纸箱尺寸（cm）：</label>
       <div class="row">
         <input type="number" id="length" placeholder="长">
         <input type="number" id="width" placeholder="宽">
         <input type="number" id="height" placeholder="高">
       </div>
-      <label>🔧 最大使用率（推荐不超过 80%）：</label>
+
+      <label>⚙️ 最大使用率（推荐不超过 80%）：</label>
       <input type="number" id="maxUsage" value="80" min="50" max="100">%
-      <label>➕ 添加商品</label>
+      
+      <label>🛒 添加商品 </label>
       <div class="row">
         <input type="text" id="itemName" placeholder="商品名称">
         <input type="number" id="itemL" placeholder="长">
@@ -269,6 +271,7 @@
         <input type="number" id="itemWeight" placeholder="重量（kg）">
         <input type="number" id="itemQty" placeholder="数量">
       </div>
+      
       <button onclick="addItem()">添加商品</button>
       <ul id="itemList"></ul>
       <button onclick="calculateBoxes()">📦 计算装箱方案</button>
