@@ -246,6 +246,14 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
       z-index: 1000;
     }
+    button:disabled, .nav-btn:disabled {
+      background-color: #b0b0b0 !important;
+      color: #f5f5f5 !important;
+      border-color: #b0b0b0 !important;
+      cursor: not-allowed !important;
+      box-shadow: none !important;
+      opacity: 0.7;
+    }
     .modal {
       display: none;
       position: fixed;
@@ -272,6 +280,28 @@
       right: 14px;
       font-size: 20px;
       cursor: pointer;
+    }
+    .intro-section p,
+    .intro-section ul,
+    .intro-section li {
+      padding-left: 16px;
+      padding-right: 16px;
+      box-sizing: border-box;
+    }
+    .intro-section h2,
+    .intro-section h3 {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+    .intro-section h2 {
+      margin-top: 0;
+    }
+    main .column h2 {
+      margin-top: 0;
+    }
+    .intro-section ul {
+      list-style: none;
+      padding-left: 0;
     }
   </style>
 </head>
@@ -307,13 +337,22 @@
           </select>
         </div>
       </div>
-      <button onclick="generateListing()" style="align-self: center;">立即生成</button>
+      <button id="generate-btn" onclick="generateListing()" style="align-self: center;">立即生成</button>
     </div>
     <div class="column">
       <h2>生成结果</h2>
       <div id="result" class="result">请输入竞品标题或五点描述，并点击立即生成。</div>
     </div>
   </main>
+  <section class="intro-section" style="max-width:1200px;margin:24px auto 40px auto;background:#fff;padding:16px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+    <h2>亚马逊Listing极速生成器简介</h2>
+    <p>本工具专为亚马逊卖家和跨境电商运营设计，支持一键生成高转化的产品标题和五点描述，助力Listing优化，提升曝光和转化率。输入竞品信息，智能生成中英文内容，适用于各类品类。</p>
+    <h3>常见问题</h3>
+    <ul>
+      <li><b>Q: 这个工具适合哪些人？</b><br>适合所有亚马逊卖家、运营、跨境电商从业者。</li>
+      <li><b>Q: 支持哪些语言？</b><br>目前支持英文生成及中文翻译。</li>
+    </ul>
+  </section>
   <footer class="site-footer">
     <div class="footer-content">
       <p>© 2025 亚马逊 Listing 极速生成器</p>
@@ -339,6 +378,7 @@
     </div>
   </div>
   <button onclick="openDonate()" class="donate-button">💗 请我喝奶茶</button>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
    async function generateListing() {
   const titles = document.getElementById("titles").value.trim();
@@ -347,12 +387,18 @@
   const keywords = document.getElementById("keywords").value.trim();
   const model = document.getElementById("model").value;
 
+  const btn = document.getElementById("generate-btn");
+  btn.disabled = true;
+  btn.textContent = "生成中...";
+
   if (!titles && !bullets) {
     document.getElementById("result").textContent = "请至少填写参考竞品标题或五点描述。";
+    btn.disabled = false;
+    btn.textContent = "立即生成";
     return;
   }
 
-  const prompt = `Based on the following reference Amazon titles and bullet points, generate a compelling, keyword-optimized product title and 5 persuasive bullet points.\n\nReference Titles:\n${titles}\n\nReference Bullets:\n${bullets}\n\nProduct Features:\n${features}\n\nTarget Keywords:\n${keywords}\n\nInstructions:\n- Output in English\n- Title: concise, clear, max 200 characters\n- Bullet Points: focus on product benefits, features, and usability (5 points total)\n- Use professional, persuasive tone suitable for Amazon customers.`;
+  const prompt = `Based on the following reference Amazon titles and bullet points, generate a compelling, keyword-optimized product title and 5 persuasive bullet points.\n\nReference Titles:\n${titles}\n\nReference Bullets:\n${bullets}\n\nProduct Features:\n${features}\n\nTarget Keywords:\n${keywords}\n\nInstructions:\n- Output both in English and Chinese translation.\n- For each part, first give the English version, then provide the corresponding Chinese translation below it.\n- Title: concise, clear, max 200 characters\n- Bullet Points: focus on product benefits, features, and usability (5 points total)\n- Use professional, persuasive tone suitable for Amazon customers.\n- 中文翻译要准确、自然，适合亚马逊中国站或跨境卖家参考。`;
 
   document.getElementById("result").textContent = "正在生成中，约需30秒...";
 
@@ -363,7 +409,9 @@
   });
 
   const data = await res.json();
-  document.getElementById("result").textContent = data.choices?.[0]?.message?.content || "生成失败，请检查 API 返回内容";
+  document.getElementById("result").innerHTML = marked.parse(data.choices?.[0]?.message?.content || "生成失败，请检查 API 返回内容");
+  btn.disabled = false;
+  btn.textContent = "立即生成";
 }
 
   function openModal() {
