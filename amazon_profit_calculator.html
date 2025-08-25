@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>亚马逊产品利润计算器 - AMZAIListing</title>
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --bg-light: #f8f9fa;
+            --bg-white: #ffffff;
+            --text-main: #343a40;
+            --text-secondary: #6c757d;
+            --border-color: #dee2e6;
+        }
+        
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-main);
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        
+        header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            padding: 0;
+        }
+        
+        #user-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        #user-actions .nav-btn {
+            margin: 0;
+            box-shadow: none;
+            background: transparent;
+            border: 1px solid white;
+            color: white;
+        }
+        
+        #user-actions .nav-btn:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: white;
+            color: white;
+        }
+        
+        .nav-bar {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 12px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .nav-btn {
+            background: #fff;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            border-radius: 999px;
+            font-size: 18px;
+            font-weight: 500;
+            padding: 8px 32px;
+            margin: 0 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .nav-btn.active, .nav-btn:active {
+            background: var(--primary-color);
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(0,122,255,0.10);
+            border-color: var(--primary-color);
+        }
+        
+        .nav-btn:hover:not(.active) {
+            box-shadow: 0 6px 20px rgba(0,122,255,0.13);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            background: rgba(0,122,255,0.1);
+        }
+        
+        main {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 32px;
+            padding: 32px 8px 24px 8px;
+            min-height: 60vh;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .form-container {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-white);
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            padding: 32px 24px;
+            min-width: 320px;
+            max-width: 800px;
+        }
+        
+        .results-container {
+            flex: 1;
+            position: sticky;
+            top: 20px;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-white);
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            padding: 32px 24px;
+            min-width: 320px;
+            max-width: 400px;
+        }
+        
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 16px;
+            font-size: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+        
+        .grid-container {
+            display: grid;
+            gap: 25px;
+        }
+        
+        #presets-section .grid-container {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        
+        #product-info-section .grid-container {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .input-group label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+            font-size: 14px;
+        }
+        
+        .input-group .input-wrapper {
+            display: flex;
+            align-items: center;
+        }
+        
+        label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: block;
+        }
+        
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            font-size: 16px;
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            box-sizing: border-box;
+            min-height: 40px;
+        }
+        
+        .input-group .input-wrapper > input {
+            flex-grow: 1;
+            border-radius: 12px 0 0 12px;
+            border-right: none;
+            min-width: 50px;
+            margin-bottom: 0;
+        }
+        
+        .input-group .input-wrapper > select, 
+        .input-group .input-wrapper > .unit-label,
+        .input-group .input-wrapper > .fetch-btn {
+            border-radius: 0 12px 12px 0;
+            margin-bottom: 0;
+        }
+        
+        .input-group .input-wrapper > select, .input-group .input-wrapper > .unit-label {
+            background-color: var(--bg-light);
+            cursor: pointer;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-left: none;
+        }
+        
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background-color: var(--bg-white);
+        }
+        
+        .fetch-btn {
+            padding: 12px 15px;
+            border: 1px solid var(--primary-color);
+            background-color: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            border-left: none;
+        }
+        
+        .fetch-btn:hover {
+            background-color: #005fcc;
+        }
+        
+        .calculate-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            align-self: flex-start;
+            margin-top: 24px;
+            width: 100%;
+        }
+        
+        .calculate-btn:hover {
+            background-color: #005fcc;
+        }
+        
+        .results {
+            margin-top: 1rem;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .result-item {
+            background-color: var(--bg-light);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .result-item h3 {
+            margin: 0;
+            color: var(--text-main);
+            font-size: 15px;
+            font-weight: 500;
+            border: none;
+            padding: 0;
+        }
+        
+        .result-item .value {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--primary-color);
+            word-wrap: break-word;
+        }
+        
+        .result-item .value.negative { 
+            color: #dc3545;
+        }
+
+        .full-width { grid-column: 1 / -1; }
+        .span-2 { grid-column: span 2; }
+        .span-3 { grid-column: span 3; }
+
+        #fetch-status {
+            font-size: 12px;
+            color: #666;
+            height: 1.5em;
+            padding-top: 5px;
+        }
+
+        .extension-guide {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            border: 1px solid #bbdefb;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 15px;
+            font-size: 14px;
+            color: #1565c0;
+        }
+
+        .extension-guide h4 {
+            margin: 0 0 15px 0;
+            color: #1565c0;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .extension-guide .step {
+            background: rgba(255,255,255,0.7);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .extension-guide .step-number {
+            background: var(--primary-color);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .extension-guide .download-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px 10px 10px 0;
+            transition: background-color 0.3s;
+        }
+
+        .extension-guide .download-btn:hover {
+            background: #005fcc;
+        }
+
+        .extension-guide .secondary-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px 10px 10px 0;
+            transition: background-color 0.3s;
+        }
+
+        .extension-guide .secondary-btn:hover {
+            background: #218838;
+        }
+
+        .go-to-amazon-btn {
+            background: #ff9900;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-left: 10px;
+        }
+
+        .go-to-amazon-btn:hover {
+            background: #e68a00;
+        }
+
+        .manual-help {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #856404;
+        }
+
+        .manual-help h4 {
+            margin: 0 0 10px 0;
+            color: #856404;
+            font-size: 14px;
+        }
+
+        .manual-help ul {
+            margin: 5px 0;
+            padding-left: 20px;
+        }
+
+        .manual-help li {
+            margin-bottom: 5px;
+        }
+
+        #history-section {
+            margin-top: 40px;
+        }
+        
+        #history-section h2 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .history-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        #clear-history-btn, #export-csv-btn {
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 12px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        #clear-history-btn {
+            background-color: #dc3545;
+        }
+        
+        #export-csv-btn {
+            background-color: #28a745;
+        }
+        
+        #clear-history-btn:hover {
+            background-color: #c82333;
+        }
+        
+        #export-csv-btn:hover {
+            background-color: #218838;
+        }
+        
+        .history-table-container {
+            overflow-x: auto;
+        }
+        
+        #history-section table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        #history-section th, #history-section td {
+            border: 1px solid #e0e0e0;
+            padding: 12px 15px;
+            text-align: left;
+            font-size: 14px;
+            vertical-align: middle;
+        }
+        
+        #history-section th {
+            background-color: #f9f9f9;
+            font-weight: 600;
+        }
+        
+        #history-section td a {
+            color: #007bff;
+            text-decoration: none;
+            word-break: break-all;
+        }
+        
+        #history-section td a:hover {
+            text-decoration: underline;
+        }
+        
+        #history-section .delete-row-btn {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 5px;
+        }
+        
+        .site-footer {
+            background-color: #343a40;
+            padding: 24px 16px;
+            text-align: center;
+            color: white;
+            font-size: 14px;
+            border-top: none;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            margin-top: 40px;
+            border-radius: 12px 12px 0 0;
+            width: 100%;
+            position: static;
+        }
+        
+        .site-footer a {
+            color: #ffffff;
+            text-decoration: underline;
+            font-weight: 500;
+            margin: 0 8px;
+        }
+        
+        .site-footer a:hover {
+            text-decoration: none;
+            opacity: 0.9;
+        }
+        
+        .donate-button {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            background-color: #fd7e14;
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 999px;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 999;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            max-width: 800px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 14px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 1200px) {
+            #presets-section .grid-container,
+            #product-info-section .grid-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .span-3 { grid-column: span 2; }
+        }
+        
+        @media (max-width: 992px) {
+            main {
+                flex-direction: column;
+                gap: 20px;
+            }
+            .results-container {
+                position: static;
+                width: 100%;
+            }
+            .nav-bar {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+            .nav-btn {
+                padding: 7px 16px;
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .form-container, .results-container { 
+                padding: 20px; 
+            }
+            #presets-section .grid-container,
+            #product-info-section .grid-container {
+                grid-template-columns: 1fr;
+            }
+            .span-2, .span-3 { grid-column: span 1; }
+            header h1 {
+                font-size: 22px;
+            }
+            main {
+                padding: 8px 2px 12px 2px;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 22px;
+                padding: 18px 0 0 0;
+            }
+            .nav-btn {
+                font-size: 15px;
+                padding: 7px 16px;
+            }
+            .nav-bar {
+                gap: 10px;
+            }
+            main {
+                padding: 8px 2px 12px 2px;
+            }
+            .form-container, .results-container {
+                padding: 12px 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>亚马逊产品利润计算器</h1>
+        <div id="user-actions">
+            <a href="auth.html" class="nav-btn" id="auth-btn">登录/注册</a>
+        </div>
+    </header>
+    <nav class="nav-bar">
+        <a href="index.html" class="nav-btn">Listing生成器</a>
+        <a href="zhuangxiang.html" class="nav-btn">装箱计算器</a>
+        <a href="amazon_profit_calculator.html" class="nav-btn active">利润计算器</a>
+        <a href="extension-download.html" class="nav-btn">下载扩展</a>
+    </nav>
+    <main>
+        <div class="form-container">
+            <section id="presets-section">
+                <h2>预设成本与规则</h2>
+                <div class="grid-container">
+                    <div class="input-group">
+                        <label for="exchangeRate">美元对人民币汇率</label>
+                        <input type="number" id="exchangeRate" value="7.25">
+                    </div>
+                    <div class="input-group">
+                        <label for="headHaulRate">头程物流单价 (CNY/kg)</label>
+                        <input type="number" id="headHaulRate" value="30">
+                    </div>
+                    <div class="input-group">
+                        <label>FBA计费规则</label>
+                        <div style="padding: 12px; border: 1px solid #eee; border-radius: 8px; background: #fafafa; font-size: 14px; height: 100%; box-sizing: border-box;">
+                            基于美站标准尺寸/大件的简化模型自动计算。
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="product-info-section">
+                <h2>产品信息与成本</h2>
+                <div class="grid-container">
+                    <div class="input-group full-width">
+                        <label for="productName">产品名称</label>
+                        <input type="text" id="productName" placeholder="例如: 智能颈部按摩仪">
+                    </div>
+                    <div class="input-group full-width">
+                        <label for="competitorLink">参考竞品链接 (Chrome插件自动获取)</label>
+                        <div class="input-wrapper">
+                            <input type="url" id="competitorLink" placeholder="粘贴亚马逊商品链接">
+                            <button class="go-to-amazon-btn" onclick="goToAmazonAndExtract()">跳转提取</button>
+                        </div>
+                        <div id="fetch-status"></div>
+                        
+                        <div id="extension-guide" class="extension-guide">
+                            <h4>🚀 使用Chrome插件自动提取产品信息</h4>
+                            
+                            <div class="step">
+                                <span class="step-number">1</span>
+                                <strong>安装Chrome插件：</strong>
+                                <br>
+                                <a href="#" class="download-btn" onclick="downloadExtension()">📥 下载插件文件</a>
+                                <a href="#" class="secondary-btn" onclick="showInstallGuide()">📖 查看安装教程</a>
+                            </div>
+                            
+                            <div class="step">
+                                <span class="step-number">2</span>
+                                <strong>使用方法：</strong>
+                                <br>• 粘贴Amazon商品链接到上方输入框
+                                <br>• 点击"跳转提取"按钮自动跳转到Amazon页面
+                                <br>• 插件会自动提取产品信息并返回到本页面
+                            </div>
+                            
+                            <div class="step">
+                                <span class="step-number">3</span>
+                                <strong>支持的信息：</strong>
+                                <br>• 产品名称、重量、尺寸（长宽高）
+                                <br>• 自动单位转换（英制→公制）
+                                <br>• 智能解析多种Amazon页面格式
+                            </div>
+                        </div>
+                        
+                        <div id="manual-help" class="manual-help" style="display: none;">
+                            <h4>手动填写指南：</h4>
+                            <ul>
+                                <li>在Amazon商品页面找到"Product details"或"Technical Details"部分</li>
+                                <li>查找"Product Dimensions"或"Package Dimensions"获取尺寸</li>
+                                <li>查找"Item Weight"或"Shipping Weight"获取重量</li>
+                                <li>如果是英制单位，系统会自动转换为公制</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="prodWeight">产品重量 (kg)</label>
+                        <input type="number" id="prodWeight" placeholder="0.8">
+                    </div>
+                    <div class="input-group">
+                        <label for="prodLength">长 (cm)</label>
+                        <input type="number" id="prodLength" placeholder="最长边">
+                    </div>
+                    <div class="input-group">
+                        <label for="prodWidth">宽 (cm)</label>
+                        <input type="number" id="prodWidth" placeholder="中间边">
+                    </div>
+                    <div class="input-group">
+                        <label for="prodHeight">高 (cm)</label>
+                        <input type="number" id="prodHeight" placeholder="最短边">
+                    </div>
+
+                    <div class="input-group span-2">
+                        <label for="sellingPrice">产品售价</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="sellingPrice" placeholder="29.99">
+                            <select id="sellingPriceCurrency"><option value="USD" selected>USD</option><option value="CNY">CNY</option></select>
+                        </div>
+                    </div>
+                    <div class="input-group span-2">
+                        <label for="purchaseCost">产品采购成本</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="purchaseCost" placeholder="35.00">
+                            <select id="purchaseCostCurrency"><option value="USD">USD</option><option value="CNY" selected>CNY</option></select>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group span-2">
+                        <label for="referralFee">销售佣金率 (%)</label>
+                        <input type="number" id="referralFee" value="15">
+                    </div>
+                    <div class="input-group span-2">
+                        <label for="refundRate">预估退款坏损率 (%)</label>
+                        <input type="number" id="refundRate" value="0">
+                    </div>
+
+                     <div class="input-group span-2">
+                        <label for="adCost">预估广告成本 (单件)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="adCost" value="0">
+                            <select id="adCostCurrency"><option value="USD" selected>USD</option><option value="CNY">CNY</option></select>
+                        </div>
+                    </div>
+                    <div class="input-group span-2">
+                        <label for="storageFee">其他成本 (仓储/包装等)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="storageFee" value="0">
+                            <select id="storageFeeCurrency"><option value="USD" selected>USD</option><option value="CNY">CNY</option></select>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <button class="calculate-btn" onclick="calculateProfit()">计算利润</button>
+
+            <section id="history-section">
+                <h2>
+                    <span>计算历史</span>
+                    <div class="history-actions">
+                        <button id="export-csv-btn" onclick="exportToCSV()">导出为 CSV</button>
+                        <button id="clear-history-btn" onclick="clearHistory()">清空历史</button>
+                    </div>
+                </h2>
+                <div class="history-table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>产品名称</th>
+                                <th>竞品链接</th>
+                                <th>售价 (USD)</th>
+                                <th>采购成本 (USD)</th>
+                                <th>头程物流 (CNY)</th>
+                                <th>FBA费用 (CNY)</th>
+                                <th>净利润 (CNY)</th>
+                                <th>利润率</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-tbody">
+                            <!-- History records will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <div class="results-container">
+            <h2>计算结果</h2>
+            <div class="results">
+                <div class="result-item">
+                    <h3>头程物流 (USD)</h3>
+                    <span class="value" id="headHaulCostResult">-$--.--</span>
+                </div>
+                <div class="result-item">
+                    <h3>FBA费用 (USD)</h3>
+                    <span class="value" id="fbaFeeResult">-$--.--</span>
+                </div>
+                <div class="result-item">
+                    <h3>净利润 (USD)</h3>
+                    <span class="value" id="netProfitUsd">-$--.--</span>
+                </div>
+                <div class="result-item">
+                    <h3>净利润 (CNY)</h3>
+                    <span class="value" id="netProfitCny">¥--.--</span>
+                </div>
+                <div class="result-item">
+                    <h3>利润率</h3>
+                    <span class="value" id="profitMargin">--.--%</span>
+                </div>
+                <div class="result-item">
+                    <h3>投资回报率 (ROI)</h3>
+                    <span class="value" id="roi">--.--%</span>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <footer class="site-footer">
+        <div class="footer-content">
+            <p>© 2025 亚马逊 Listing 极速生成器</p>
+            <p>
+                <a href="privacy-policy.html">隐私政策</a> |
+                <a href="terms-of-service.html">服务条款</a> |
+                <a href="about-us.html">关于我们</a> |
+                <a href="mailto:gskanchan@163.com">联系我们</a> |
+                <a href="javascript:void(0);" onclick="openModal()">提交反馈</a>
+            </p>
+        </div>
+    </footer>
+    
+    <div id="feedbackModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal()">×</span>
+            <iframe src="https://uqi0gjbiwfl.feishu.cn/share/base/form/shrcn0RZevoq7QLVvGN6U5gojqb"
+                    frameborder="0" width="100%" height="700" style="border-radius: 12px;"></iframe>
+        </div>
+    </div>
+    
+    <div id="donateModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeDonate()">×</span>
+            <h3>☕ 请我喝杯奶茶吧！</h3>
+            <img src="donate.png" alt="打赏二维码" style="max-width: 300px; width: 100%; border-radius: 10px;"/>
+            <p style="margin-top: 10px;">长按或扫码支付，感谢你的支持！🥰</p>
+        </div>
+    </div>
+    
+    <button onclick="openDonate()" class="donate-button">💗 请我喝奶茶</button>
+
+    <script>
+        // --- FBA & Cost Calculation Logic ---
+        const FBA_FEES = {
+            standard: { 0.25: 3.22, 0.5: 3.40, 0.75: 3.58, 1.0: 3.77, 1.5: 4.15, 2.0: 4.53, 2.5: 4.93, 3.0: 5.43, over_3_base: 5.43, over_3_per_lb: 0.38 },
+            oversize: { base: 9.73, per_lb_over_1: 0.42 }
+        };
+        
+        function getValue(id) { return parseFloat(document.getElementById(id).value) || 0; }
+        
+        function getValueInUSD(id, exchangeRate) {
+            const value = getValue(id);
+            const currency = document.getElementById(id + 'Currency').value;
+            if (currency === 'CNY') { return value / exchangeRate; }
+            return value;
+        }
+        
+        function calculateHeadHaulCost(weightKg, rateCnyPerKg, exchangeRate) {
+            if (weightKg <= 0 || rateCnyPerKg <= 0) return 0;
+            return (weightKg * rateCnyPerKg) / exchangeRate;
+        }
+        
+        function calculateFbaFee(weightKg, lengthCm, widthCm, heightCm) {
+            if (weightKg <= 0 || lengthCm <= 0 || widthCm <= 0 || heightCm <= 0) return 0;
+            const weightLb = weightKg * 2.20462;
+            const dims = [(lengthCm / 2.54), (widthCm / 2.54), (heightCm / 2.54)].sort((a, b) => b - a);
+            let tier = (dims[0] > 18 || dims[1] > 14 || dims[2] > 8 || weightLb > 20) ? 'oversize' : 'standard';
+            let shippingWeight = Math.max(weightLb, (dims[0] * dims[1] * dims[2]) / 139);
+            if (tier === 'standard') {
+                 const weightTiers = Object.keys(FBA_FEES.standard).filter(k => !k.startsWith('over')).map(parseFloat);
+                 for (const tierWeight of weightTiers) {
+                     if (shippingWeight <= tierWeight) return FBA_FEES.standard[tierWeight.toString()];
+                 }
+                 return FBA_FEES.standard.over_3_base + Math.ceil(shippingWeight - 3) * FBA_FEES.standard.over_3_per_lb;
+            } else {
+                const roundedWeight = Math.ceil(shippingWeight);
+                return FBA_FEES.oversize.base + (roundedWeight > 1 ? (roundedWeight - 1) * FBA_FEES.oversize.per_lb_over_1 : 0);
+            }
+        }
+        
+        function calculateProfit() {
+            const exchangeRate = getValue('exchangeRate');
+            if (!exchangeRate || exchangeRate <= 0) { alert('请输入一个有效的正数汇率！'); return; }
+            const prodWeight = getValue('prodWeight');
+            const prodLength = getValue('prodLength');
+            const prodWidth = getValue('prodWidth');
+            const prodHeight = getValue('prodHeight');
+            const sellingPrice = getValueInUSD('sellingPrice', exchangeRate);
+            const purchaseCost = getValueInUSD('purchaseCost', exchangeRate);
+            const adCost = getValueInUSD('adCost', exchangeRate);
+            const storageFee = getValueInUSD('storageFee', exchangeRate);
+            const headHaulCost = calculateHeadHaulCost(prodWeight, getValue('headHaulRate'), exchangeRate);
+            const fbaFee = calculateFbaFee(prodWeight, prodLength, prodWidth, prodHeight);
+            if (sellingPrice === 0) { alert('请输入产品售价！'); return; }
+            if (fbaFee === 0 && prodWeight > 0) { console.warn('无法计算FBA费用，请检查产品尺寸和重量。'); }
+            const referralFee = sellingPrice * (getValue('referralFee') / 100);
+            const refundCost = sellingPrice * (getValue('refundRate') / 100);
+            const totalCost = purchaseCost + headHaulCost + fbaFee + referralFee + adCost + storageFee + refundCost;
+            const netProfitUsd = sellingPrice - totalCost;
+            const netProfitCny = netProfitUsd * exchangeRate;
+            const profitMargin = (sellingPrice > 0) ? (netProfitUsd / sellingPrice) * 100 : 0;
+            const totalInvestment = purchaseCost + headHaulCost;
+            const roi = (totalInvestment > 0) ? (netProfitUsd / totalInvestment) * 100 : 0;
+            document.getElementById('headHaulCostResult').textContent = `${headHaulCost.toFixed(2)} USD`;
+            document.getElementById('fbaFeeResult').textContent = `${fbaFee.toFixed(2)} USD`;
+            document.getElementById('netProfitUsd').textContent = `${netProfitUsd.toFixed(2)} USD`;
+            document.getElementById('netProfitCny').textContent = `¥${netProfitCny.toFixed(2)}`;
+            document.getElementById('profitMargin').textContent = `${profitMargin.toFixed(2)}%`;
+            document.getElementById('roi').textContent = `${roi.toFixed(2)}%`;
+            [ 'netProfitUsd', 'netProfitCny', 'profitMargin', 'roi'].forEach(id => {
+                const elem = document.getElementById(id).parentElement;
+                netProfitUsd < 0 ? elem.querySelector('.value').classList.add('negative') : elem.querySelector('.value').classList.remove('negative');
+            });
+
+            // Add to history
+            const productName = document.getElementById('productName').value || '未命名产品';
+            const competitorLink = document.getElementById('competitorLink').value;
+            const headHaulCostCny = headHaulCost * exchangeRate;
+            const fbaFeeCny = fbaFee * exchangeRate;
+            addHistoryRecord({
+                id: Date.now(),
+                productName,
+                competitorLink,
+                sellingPrice: sellingPrice.toFixed(2),
+                purchaseCost: purchaseCost.toFixed(2),
+                headHaulCostCny: headHaulCostCny.toFixed(2),
+                fbaFeeCny: fbaFeeCny.toFixed(2),
+                netProfitCny: netProfitCny.toFixed(2),
+                profitMargin: profitMargin.toFixed(2)
+            });
+        }
+
+        // --- Chrome Extension Integration ---
+        function goToAmazonAndExtract() {
+            const url = document.getElementById('competitorLink').value;
+            const statusEl = document.getElementById('fetch-status');
+            
+            if (!url || (!url.includes('amazon.com') && !url.includes('amazon.cn'))) {
+                statusEl.textContent = '请输入一个有效的亚马逊链接。';
+                statusEl.style.color = '#dc3545';
+                return;
+            }
+            
+            // 检查是否安装了插件
+            if (!isExtensionInstalled()) {
+                statusEl.textContent = '请先安装Chrome插件！点击上方"下载插件文件"按钮。';
+                statusEl.style.color = '#dc3545';
+                showInstallGuide();
+                return;
+            }
+            
+            statusEl.textContent = '正在跳转到Amazon页面，请在新页面中使用插件提取信息...';
+            statusEl.style.color = '#007bff';
+            
+            // 在新标签页中打开Amazon链接
+            const newWindow = window.open(url, '_blank');
+            
+            // 设置一个标识，表示用户是从利润计算器跳转过去的
+            localStorage.setItem('calculatorReturnUrl', window.location.href);
+            localStorage.setItem('extractionInProgress', 'true');
+            
+            // 监听插件返回的数据
+            const checkInterval = setInterval(() => {
+                const extractionData = localStorage.getItem('amazonProductData');
+                if (extractionData) {
+                    clearInterval(checkInterval);
+                    statusEl.textContent = '成功接收到产品信息！';
+                    statusEl.style.color = '#28a745';
+                    
+                    // 处理接收到的数据
+                    receiveExtensionData();
+                    
+                    // 清理标识
+                    localStorage.removeItem('extractionInProgress');
+                }
+            }, 1000);
+            
+            // 30秒后停止监听
+            setTimeout(() => {
+                clearInterval(checkInterval);
+                if (localStorage.getItem('extractionInProgress')) {
+                    statusEl.textContent = '等待超时。请确保已安装插件并在Amazon页面中点击插件图标。';
+                    statusEl.style.color = '#ffc107';
+                    localStorage.removeItem('extractionInProgress');
+                }
+            }, 30000);
+        }
+        
+        function isExtensionInstalled() {
+            // 简单检查：看是否有插件设置的标识
+            return localStorage.getItem('amazonExtensionInstalled') === 'true';
+        }
+        
+        function downloadExtension() {
+            // 创建一个包含所有插件文件的zip下载
+            const statusEl = document.getElementById('fetch-status');
+            statusEl.textContent = '插件文件已准备好，请按照安装教程进行安装。';
+            statusEl.style.color = '#007bff';
+            
+            // 显示安装指南
+            showInstallGuide();
+            
+            // 这里可以添加实际的文件下载逻辑
+            alert('插件文件下载功能开发中。请联系管理员获取插件文件。\n\n或者您可以按照以下步骤手动创建插件：\n1. 创建chrome-extension文件夹\n2. 复制manifest.json等文件\n3. 在Chrome中加载已解压的扩展程序');
+        }
+        
+        function showInstallGuide() {
+            const guideModal = document.createElement('div');
+            guideModal.className = 'modal';
+            guideModal.style.display = 'flex';
+            guideModal.innerHTML = `
+                <div class="modal-content" style="max-width: 600px;">
+                    <span class="close-button" onclick="this.parentElement.parentElement.remove()">×</span>
+                    <h3>🔧 Chrome插件安装教程</h3>
+                    <div style="text-align: left; line-height: 1.6;">
+                        <div class="step" style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                            <strong>步骤 1：下载插件文件</strong><br>
+                            点击"下载插件文件"按钮，获取chrome-extension文件夹
+                        </div>
+                        <div class="step" style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                            <strong>步骤 2：打开Chrome扩展管理</strong><br>
+                            在Chrome地址栏输入：<code>chrome://extensions/</code>
+                        </div>
+                        <div class="step" style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                            <strong>步骤 3：启用开发者模式</strong><br>
+                            在页面右上角开启"开发者模式"开关
+                        </div>
+                        <div class="step" style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                            <strong>步骤 4：加载插件</strong><br>
+                            点击"加载已解压的扩展程序"，选择chrome-extension文件夹
+                        </div>
+                        <div class="step" style="margin: 15px 0; padding: 15px; background: #e8f5e8; border-radius: 8px;">
+                            <strong>✅ 安装成功！</strong><br>
+                            插件图标会出现在Chrome工具栏中，现在可以使用自动提取功能了
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(guideModal);
+        }
+
+        // --- Legacy Amazon Data Fetching Logic (Fallback) ---
+        async function fetchProductInfo() {
+            const statusEl = document.getElementById('fetch-status');
+            statusEl.textContent = '建议使用Chrome插件进行信息提取，成功率更高！';
+            statusEl.style.color = '#ffc107';
+            
+            // 显示手动输入提示
+            showManualInputHelp();
+        }
+
+        function parseProductInfo(doc) {
+            console.log('开始解析产品信息...');
+            
+            let foundDim = false;
+            let foundWt = false;
+            
+            // 方法1: 尝试从详细信息区域解析
+            const result1 = parseFromDetailBullets(doc);
+            foundDim = result1.foundDim || foundDim;
+            foundWt = result1.foundWt || foundWt;
+            
+            // 方法2: 尝试从技术详情表格解析
+            if (!foundDim || !foundWt) {
+                const result2 = parseFromTechDetails(doc);
+                foundDim = result2.foundDim || foundDim;
+                foundWt = result2.foundWt || foundWt;
+            }
+            
+            // 方法3: 尝试从产品特性区域解析
+            if (!foundDim || !foundWt) {
+                const result3 = parseFromFeatures(doc);
+                foundDim = result3.foundDim || foundDim;
+                foundWt = result3.foundWt || foundWt;
+            }
+            
+            // 方法4: 尝试从JSON-LD结构化数据解析
+            if (!foundDim || !foundWt) {
+                const result4 = parseFromStructuredData(doc);
+                foundDim = result4.foundDim || foundDim;
+                foundWt = result4.foundWt || foundWt;
+            }
+            
+            console.log(`解析结果: 尺寸=${foundDim}, 重量=${foundWt}`);
+            return foundDim || foundWt;
+        }
+
+        function parseFromDetailBullets(doc) {
+            const detailList = doc.querySelector('#detailBullets_feature_div ul');
+            if (!detailList) return { foundDim: false, foundWt: false };
+
+            let dimensionsStr = '';
+            let weightStr = '';
+
+            const listItems = detailList.querySelectorAll('li');
+            listItems.forEach(li => {
+                const boldSpan = li.querySelector('span.a-text-bold');
+                if (boldSpan) {
+                    const label = boldSpan.textContent.trim().toLowerCase();
+                    const valueSpan = boldSpan.parentElement.querySelectorAll('span')[1];
+                    if (!valueSpan) return;
+
+                    if (label.includes('dimensions') || label.includes('product dimensions')) {
+                        dimensionsStr = valueSpan.textContent.trim();
+                    }
+                    if (label.includes('item weight') || label.includes('weight')) {
+                        weightStr = valueSpan.textContent.trim();
+                    }
+                }
+            });
+
+            let foundDim = false;
+            let foundWt = false;
+
+            if (dimensionsStr) {
+                foundDim = parseDimensions(dimensionsStr);
+            }
+            
+            if (weightStr) {
+                foundWt = parseAndSetWeight(weightStr);
+            }
+            
+            return { foundDim, foundWt };
+        }
+        
+        function parseFromTechDetails(doc) {
+            let foundDim = false;
+            let foundWt = false;
+            
+            // 查找技术详情表格
+            const tables = doc.querySelectorAll('table');
+            tables.forEach(table => {
+                const rows = table.querySelectorAll('tr');
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td, th');
+                    if (cells.length >= 2) {
+                        const label = cells[0].textContent.trim().toLowerCase();
+                        const value = cells[1].textContent.trim();
+                        
+                        if ((label.includes('dimensions') || label.includes('size')) && !foundDim) {
+                            foundDim = parseDimensions(value);
+                        }
+                        if ((label.includes('weight') || label.includes('重量')) && !foundWt) {
+                            foundWt = parseAndSetWeight(value);
+                        }
+                    }
+                });
+            });
+            
+            return { foundDim, foundWt };
+        }
+        
+        function parseFromFeatures(doc) {
+            let foundDim = false;
+            let foundWt = false;
+            
+            // 查找产品特性区域
+            const featureSelectors = [
+                '#feature-bullets ul li',
+                '.a-unordered-list .a-list-item',
+                '[data-feature-name] .a-list-item'
+            ];
+            
+            featureSelectors.forEach(selector => {
+                const items = doc.querySelectorAll(selector);
+                items.forEach(item => {
+                    const text = item.textContent.toLowerCase();
+                    if ((text.includes('dimensions') || text.includes('size')) && !foundDim) {
+                        foundDim = parseDimensions(item.textContent);
+                    }
+                    if (text.includes('weight') && !foundWt) {
+                        foundWt = parseAndSetWeight(item.textContent);
+                    }
+                });
+            });
+            
+            return { foundDim, foundWt };
+        }
+        
+        function parseFromStructuredData(doc) {
+            let foundDim = false;
+            let foundWt = false;
+            
+            // 查找JSON-LD结构化数据
+            const scripts = doc.querySelectorAll('script[type="application/ld+json"]');
+            scripts.forEach(script => {
+                try {
+                    const data = JSON.parse(script.textContent);
+                    if (data.offers && data.offers.length > 0) {
+                        const offer = data.offers[0];
+                        if (offer.itemOffered) {
+                            const item = offer.itemOffered;
+                            if (item.weight && !foundWt) {
+                                foundWt = parseAndSetWeight(item.weight);
+                            }
+                            if (item.dimensions && !foundDim) {
+                                foundDim = parseDimensions(JSON.stringify(item.dimensions));
+                            }
+                        }
+                    }
+                } catch (e) {
+                    // 忽略JSON解析错误
+                }
+            });
+            
+            return { foundDim, foundWt };
+        }
+        
+        function parseDimensions(dimensionsStr) {
+            if (!dimensionsStr) return false;
+            
+            // 支持多种格式的尺寸解析
+            const patterns = [
+                /(\d+\.?\d*)\s*[x×]\s*(\d+\.?\d*)\s*[x×]\s*(\d+\.?\d*)\s*(inches?|in|cm|centimeters?)/i,
+                /(\d+\.?\d*)\s*[x×]\s*(\d+\.?\d*)\s*[x×]\s*(\d+\.?\d*)/i,
+                /长[：:]\s*(\d+\.?\d*)\s*cm.*宽[：:]\s*(\d+\.?\d*)\s*cm.*高[：:]\s*(\d+\.?\d*)\s*cm/i
+            ];
+            
+            for (const pattern of patterns) {
+                const match = dimensionsStr.match(pattern);
+                if (match) {
+                    let l = parseFloat(match[1]);
+                    let w = parseFloat(match[2]);
+                    let h = parseFloat(match[3]);
+                    
+                    // 单位转换
+                    if (match[4] && (match[4].toLowerCase().includes('inch') || match[4].toLowerCase().includes('in'))) {
+                        l *= 2.54; w *= 2.54; h *= 2.54;
+                    }
+                    
+                    // 按大小排序
+                    const dims = [l, w, h].sort((a,b) => b-a);
+                    document.getElementById('prodLength').value = dims[0].toFixed(2);
+                    document.getElementById('prodWidth').value = dims[1].toFixed(2);
+                    document.getElementById('prodHeight').value = dims[2].toFixed(2);
+                    
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+
+        function parseAndSetWeight(text) {
+            if (!text) return false;
+            const weightMatch = text.match(/(\d+\.?\d*)\s*(pounds|ounces|kg|kilograms|g|grams)/i);
+            if (weightMatch) {
+                let weight = parseFloat(weightMatch[1]);
+                const unit = weightMatch[2].toLowerCase();
+                if (unit === 'pounds') weight *= 0.453592;
+                if (unit === 'ounces') weight *= 0.0283495;
+                if (unit === 'g' || unit === 'grams') weight /= 1000;
+                document.getElementById('prodWeight').value = weight.toFixed(3);
+                return true;
+            }
+            return false;
+        }
+
+        function showManualInputHelp() {
+            const helpDiv = document.getElementById('manual-help');
+            if (helpDiv) {
+                helpDiv.style.display = 'block';
+            }
+        }
+
+        // --- Preset Costs Logic ---
+        function savePresetCosts() {
+            const exchangeRate = document.getElementById('exchangeRate').value;
+            const headHaulRate = document.getElementById('headHaulRate').value;
+            localStorage.setItem('presetCosts', JSON.stringify({ exchangeRate, headHaulRate }));
+        }
+
+        function loadPresetCosts() {
+            const savedPresets = localStorage.getItem('presetCosts');
+            if (savedPresets) {
+                const { exchangeRate, headHaulRate } = JSON.parse(savedPresets);
+                if (exchangeRate) document.getElementById('exchangeRate').value = exchangeRate;
+                if (headHaulRate) document.getElementById('headHaulRate').value = headHaulRate;
+            }
+        }
+
+        // --- History Logic ---
+        let calculationHistory = [];
+
+        function renderHistory() {
+            const tbody = document.getElementById('history-tbody');
+            tbody.innerHTML = '';
+            if (calculationHistory.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">暂无历史记录</td></tr>';
+                return;
+            }
+            calculationHistory.forEach(record => {
+                const tr = document.createElement('tr');
+                tr.setAttribute('data-id', record.id);
+                tr.innerHTML = `
+                    <td>${escapeHTML(record.productName)}</td>
+                    <td><a href="${escapeHTML(record.competitorLink)}" target="_blank" rel="noopener noreferrer">${escapeHTML(record.competitorLink)}</a></td>
+                    <td>${record.sellingPrice || 'N/A'}</td>
+                    <td>${record.purchaseCost}</td>
+                    <td>${record.headHaulCostCny || 'N/A'}</td>
+                    <td>${record.fbaFeeCny || 'N/A'}</td>
+                    <td>${record.netProfitCny || 'N/A'}</td>
+                    <td>${record.profitMargin}%</td>
+                    <td><button class="delete-row-btn" onclick="deleteHistoryRecord(${record.id})">删除</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function saveHistory() {
+            localStorage.setItem('calculationHistory', JSON.stringify(calculationHistory));
+        }
+
+        function loadHistory() {
+            const savedHistory = localStorage.getItem('calculationHistory');
+            if (savedHistory) {
+                calculationHistory = JSON.parse(savedHistory);
+            }
+            renderHistory();
+        }
+
+        function addHistoryRecord(record) {
+            calculationHistory.unshift(record);
+            saveHistory();
+            renderHistory();
+        }
+
+        function deleteHistoryRecord(id) {
+            calculationHistory = calculationHistory.filter(record => record.id !== id);
+            saveHistory();
+            renderHistory();
+        }
+
+        function clearHistory() {
+            if (confirm('确定要清空所有历史记录吗？')) {
+                calculationHistory = [];
+                saveHistory();
+                renderHistory();
+            }
+        }
+        
+        function escapeHTML(str) {
+            if (!str) return '';
+            return str.replace(/[&<>"']/g, function(match) {
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                }[match];
+            });
+        }
+
+        function exportToCSV() {
+            if (calculationHistory.length === 0) {
+                alert('没有可导出的历史记录。');
+                return;
+            }
+
+            const headers = ['产品名称', '竞品链接', '售价 (USD)', '采购成本 (USD)', '头程物流 (CNY)', 'FBA费用 (CNY)', '净利润 (CNY)', '利润率 (%)'];
+            let csvContent = '\uFEFF' + headers.join(',') + '\n';
+
+            calculationHistory.forEach(record => {
+                const row = [
+                    `"${record.productName.replace(/"/g, '""')}"`,
+                    `"${record.competitorLink}"`,
+                    record.sellingPrice || 'N/A',
+                    record.purchaseCost,
+                    record.headHaulCostCny || 'N/A',
+                    record.fbaFeeCny || 'N/A',
+                    record.netProfitCny || record.netProfitUsd || 'N/A',
+                    record.profitMargin
+                ];
+                csvContent += row.join(',') + '\n';
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", "amazon_profit_history.csv");
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 接收Chrome扩展数据
+        function receiveExtensionData() {
+            // 检查localStorage中是否有扩展数据
+            const extensionData = localStorage.getItem('amazonProductData');
+            if (extensionData) {
+                try {
+                    const data = JSON.parse(extensionData);
+                    fillFormWithExtensionData(data);
+                    
+                    // 显示成功消息
+                    const statusEl = document.getElementById('fetch-status');
+                    if (statusEl) {
+                        statusEl.textContent = '已从Chrome扩展接收产品信息！';
+                        statusEl.style.color = '#28a745';
+                    }
+                    
+                    // 清除数据避免重复使用
+                    localStorage.removeItem('amazonProductData');
+                } catch (error) {
+                    console.error('解析扩展数据失败:', error);
+                }
+            }
+        }
+
+        // 用扩展数据填充表单
+        function fillFormWithExtensionData(data) {
+            console.log('接收到扩展数据:', data);
+            
+            // 填充产品名称
+            if (data.title) {
+                document.getElementById('productName').value = data.title;
+            }
+            
+            // 填充重量
+            if (data.weightKg && data.weightKg > 0) {
+                document.getElementById('prodWeight').value = data.weightKg.toFixed(3);
+            }
+            
+            // 填充尺寸
+            if (data.length && data.length > 0) {
+                document.getElementById('prodLength').value = data.length.toFixed(2);
+            }
+            if (data.width && data.width > 0) {
+                document.getElementById('prodWidth').value = data.width.toFixed(2);
+            }
+            if (data.height && data.height > 0) {
+                document.getElementById('prodHeight').value = data.height.toFixed(2);
+            }
+            
+            // 填充链接
+            if (data.url) {
+                document.getElementById('competitorLink').value = data.url;
+            }
+            
+            // 隐藏手动输入提示
+            const helpDiv = document.getElementById('manual-help');
+            if (helpDiv) {
+                helpDiv.style.display = 'none';
+            }
+        }
+
+        // 监听来自扩展的实时消息
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'AMAZON_PRODUCT_DATA') {
+                fillFormWithExtensionData(event.data.data);
+                
+                const statusEl = document.getElementById('fetch-status');
+                if (statusEl) {
+                    statusEl.textContent = '已接收Chrome扩展数据！';
+                    statusEl.style.color = '#28a745';
+                }
+            }
+        });
+
+        // 监听localStorage变化
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'amazonProductData' && e.newValue) {
+                try {
+                    const data = JSON.parse(e.newValue);
+                    fillFormWithExtensionData(data);
+                } catch (error) {
+                    console.error('解析存储数据失败:', error);
+                }
+            }
+        });
+
+        // Modal functions
+        function openModal() {
+            document.getElementById("feedbackModal").style.display = "flex";
+        }
+        
+        function closeModal() {
+            document.getElementById("feedbackModal").style.display = "none";
+        }
+
+        function openDonate() {
+            document.getElementById("donateModal").style.display = "flex";
+        }
+        
+        function closeDonate() {
+            document.getElementById("donateModal").style.display = "none";
+        }
+
+        // Load presets and history on page startup
+        document.addEventListener('DOMContentLoaded', () => {
+            loadPresetCosts();
+            loadHistory();
+            
+            // 检查是否有扩展数据
+            receiveExtensionData();
+            
+            // Add event listeners to save presets on change
+            document.getElementById('exchangeRate').addEventListener('input', savePresetCosts);
+            document.getElementById('headHaulRate').addEventListener('input', savePresetCosts);
+        });
+
+    </script>
+
+</body>
+</html>
