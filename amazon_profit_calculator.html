@@ -174,7 +174,7 @@
         
         .input-group .input-wrapper {
             display: flex;
-            align-items: center;
+            align-items: stretch;
         }
         
         label {
@@ -387,20 +387,22 @@
         }
 
         .go-to-amazon-btn {
-            background: #ff9900;
+            background: var(--primary-color);
             color: white;
-            border: none;
+            border: 1px solid var(--primary-color);
+            border-left: none;
             padding: 12px 20px;
-            border-radius: 8px;
+            border-radius: 0 12px 12px 0;
             font-size: 14px;
             font-weight: bold;
             cursor: pointer;
             transition: background-color 0.3s;
-            margin-left: 10px;
+            margin: 0;
+            flex-shrink: 0;
         }
 
         .go-to-amazon-btn:hover {
-            background: #e68a00;
+            background: #005fcc;
         }
 
         .manual-help {
@@ -698,7 +700,7 @@
                         </div>
                         <div id="fetch-status"></div>
                         
-                        <div id="extension-guide" class="extension-guide">
+                        <div id="extension-guide" class="extension-guide" style="display: none;">
                             <h4>🚀 使用Chrome插件自动提取产品信息</h4>
                             
                             <div class="step">
@@ -995,10 +997,11 @@
             
             // 检查是否安装了插件
             if (!isExtensionInstalled()) {
-                statusEl.textContent = '请先安装Chrome插件！点击上方"下载插件文件"按钮。';
-                statusEl.style.color = '#dc3545';
-                showInstallGuide();
-                return;
+                // statusEl.textContent = '请先安装Chrome插件！点击上方"下载插件文件"按钮。';
+                // statusEl.style.color = '#dc3545';
+                // showInstallGuide();
+                // return;
+                console.warn('未检测到Chrome插件，将直接尝试打开链接。');
             }
             
             statusEl.textContent = '正在跳转到Amazon页面，请在新页面中使用插件提取信息...';
