@@ -7,14 +7,12 @@
   <meta name="description" content="亚马逊智能装箱计算器，支持分仓和装箱优化，适合跨境卖家。" />
   <style>
     :root {
-      --primary-color: #007aff;
-      --gradient-start: #6a11cb;
-      --gradient-end: #2575fc;
-      --bg-light: #f5f5f7;
+      --primary-color: #007bff;
+      --bg-light: #f8f9fa;
       --bg-white: #ffffff;
-      --text-main: #1c1c1e;
-      --text-secondary: #636366;
-      --border-color: #d1d1d6;
+      --text-main: #343a40;
+      --text-secondary: #6c757d;
+      --border-color: #dee2e6;
     }
     html, body {
       height: 100%;
@@ -25,22 +23,38 @@
       color: var(--text-main);
     }
     header {
-      background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+      background-color: var(--primary-color);
       color: white;
-      min-height: 100px;
+      min-height: 80px;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 0 0 10px 0;
+      justify-content: space-between;
+      padding: 0 32px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
     header h1 {
       margin: 0;
-      font-size: 32px;
+      font-size: 28px;
       font-weight: bold;
-      letter-spacing: 2px;
-      padding: 32px 0 0 0;
+      letter-spacing: 1px;
+      padding: 0;
+    }
+    #user-actions {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    #user-actions .nav-btn {
+      margin: 0;
+      box-shadow: none;
+      background: transparent;
+      border: 1px solid white;
+      color: white;
+    }
+    #user-actions .nav-btn:hover {
+      background: rgba(255,255,255,0.2);
+      border-color: white;
+      color: white;
     }
     .nav-bar {
       display: flex;
@@ -177,7 +191,7 @@
       }
     }
     .site-footer {
-      background: linear-gradient(90deg, #6a11cb, #2575fc);
+      background-color: #343a40;
       padding: 24px 16px;
       text-align: center;
       color: white;
@@ -193,6 +207,7 @@
       color: #ffffff;
       text-decoration: underline;
       font-weight: 500;
+      margin: 0 8px;
     }
     .site-footer a:hover {
       text-decoration: none;
@@ -202,7 +217,7 @@
       position: fixed;
       right: 20px;
       bottom: 20px;
-      background: linear-gradient(90deg, #ff6a00, #ee0979);
+      background-color: #fd7e14;
       color: white;
       border: none;
       padding: 12px 16px;
@@ -244,6 +259,9 @@
 <body>
   <header>
     <h1>智能装箱计算器</h1>
+    <div id="user-actions">
+        <a href="auth.html" class="nav-btn" id="auth-btn">登录/注册</a>
+    </div>
   </header>
   <nav class="nav-bar">
     <a href="index.html" class="nav-btn">Listing生成器</a>
@@ -272,9 +290,9 @@
         <input type="number" id="itemQty" placeholder="数量">
       </div>
       
-      <button onclick="addItem()">添加商品</button>
+      <button id="add-item-btn">添加商品</button>
       <ul id="itemList"></ul>
-      <button onclick="calculateBoxes()">📦 计算装箱方案</button>
+      <button id="calculate-btn">📦 计算装箱方案</button>
       <div id="result"></div>
     </div>
   </main>
@@ -282,28 +300,62 @@
     <div class="footer-content">
       <p>© 2025 智能装箱计算器</p>
       <p>
-        📧 <a href="mailto:gskanchan@163.com">发送邮件联系我</a> |
-        💬 <a href="javascript:void(0);" onclick="openModal()">提交反馈</a>
+        <a href="privacy-policy.html">隐私政策</a> |
+        <a href="terms-of-service.html">服务条款</a> |
+        <a href="about-us.html">关于我们</a> |
+        <a href="mailto:gskanchan@163.com">联系我们</a> |
+        <a href="javascript:void(0);" id="feedback-btn">提交反馈</a>
       </p>
     </div>
   </footer>
   <div id="feedbackModal" class="modal">
     <div class="modal-content">
-      <span class="close-button" onclick="closeModal()">×</span>
+      <span class="close-button" data-target="feedbackModal">×</span>
       <iframe src="https://uqi0gjbiwfl.feishu.cn/share/base/form/shrcn0RZevoq7QLVvGN6U5gojqb"
               frameborder="0" width="100%" height="700" style="border-radius: 12px;"></iframe>
     </div>
   </div>
   <div id="donateModal" class="modal">
     <div class="modal-content">
-      <span class="close-button" onclick="closeDonate()">×</span>
+      <span class="close-button" data-target="donateModal">×</span>
       <h3>☕ 请我喝杯奶茶吧！</h3>
       <img src="donate.png" alt="打赏二维码" style="max-width: 300px; width: 100%; border-radius: 10px;"/>
       <p style="margin-top: 10px;">长按或扫码支付，感谢你的支持！🥰</p>
     </div>
   </div>
-  <button onclick="openDonate()" class="donate-button">💗 请我喝奶茶</button>
-  <script>
+  <button class="donate-button">💗 请我喝奶茶</button>
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    // --- Supabase Auth ---
+    const supabaseUrl = 'https://ctgsfnecogatpjgsjygx.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0Z3NmbmVjb2dhdHBqZ3NqeWd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwODk3ODYsImV4cCI6MjA3MTY2NTc4Nn0.xAUVO4DMjj-JievQ51SGxL1QMh3Zc1sATXPXEO_iPCw';
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const userActions = document.getElementById('user-actions');
+
+    async function checkUserSession() {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+            const { user } = session;
+            userActions.innerHTML = `
+                <span style="font-size: 14px; color: white;">欢迎, ${user.email}</span>
+                <a href="#" id="logout-btn" style="color: white; text-decoration: underline; font-size: 14px;">退出</a>
+            `;
+            
+            userActions.querySelector('#logout-btn').addEventListener('click', async (e) => {
+                e.preventDefault();
+                const { error } = await supabase.auth.signOut();
+                if (!error) {
+                    window.location.reload();
+                } else {
+                    console.error('退出失败:', error);
+                }
+            });
+        }
+    }
+
+    // --- App Logic ---
     let rawItems = [];
 
     function addItem() {
@@ -423,22 +475,32 @@
       document.getElementById('result').innerHTML = html;
     }
 
-    // Modal related functions
-    function openModal() {
-      document.getElementById("feedbackModal").style.display = "flex";
+    // --- Modal Logic ---
+    function openModal(id) {
+      document.getElementById(id).style.display = "flex";
     }
-    
-    function closeModal() {
-      document.getElementById("feedbackModal").style.display = "none";
+    function closeModal(id) {
+      document.getElementById(id).style.display = "none";
     }
 
-    function openDonate() {
-      document.getElementById("donateModal").style.display = "flex";
-    }
-    
-    function closeDonate() {
-      document.getElementById("donateModal").style.display = "none";
-    }
+    // --- Event Listeners ---
+    document.addEventListener('DOMContentLoaded', () => {
+      checkUserSession();
+
+      document.getElementById('add-item-btn').addEventListener('click', addItem);
+      document.getElementById('calculate-btn').addEventListener('click', calculateBoxes);
+      document.getElementById('feedback-btn').addEventListener('click', () => openModal('feedbackModal'));
+      document.querySelector('.donate-button').addEventListener('click', () => openModal('donateModal'));
+      
+      document.querySelectorAll('.close-button').forEach(button => {
+        button.addEventListener('click', (e) => {
+          const targetId = e.target.getAttribute('data-target');
+          if (targetId) {
+            closeModal(targetId);
+          }
+        });
+      });
+    });
   </script>
 </body>
 </html>
