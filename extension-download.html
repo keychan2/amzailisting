@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>下载Chrome扩展 | 亚马逊Listing极速生成器</title>
-  <meta name="description" content="下载亚马逊产品数据提取Chrome扩展程序，轻松获取竞品信息。" />
-  <meta name="keywords" content="Chrome扩展, 亚马逊工具, 数据提取, 跨境电商工具" />
+  <title>安装Chrome扩展 | 亚马逊Listing极速生成器</title>
+  <meta name="description" content="安装亚马逊产品数据提取Chrome扩展程序，轻松获取竞品信息。" />
+  <meta name="keywords" content="Chrome扩展, 亚马逊工具, 数据提取, 跨境电商工具, 安装教程" />
   <style>
     :root {
       --primary-color: #007bff;
@@ -102,40 +102,6 @@
       min-height: 60vh;
       max-width: 900px;
       margin: 0 auto;
-      text-align: center;
-    }
-    .download-section {
-      background-color: var(--bg-white);
-      border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-      padding: 48px 32px;
-      width: 100%;
-    }
-    h2 {
-      color: var(--primary-color);
-      margin-bottom: 16px;
-      font-size: 28px;
-    }
-    p {
-        font-size: 18px;
-        color: var(--text-secondary);
-        line-height: 1.6;
-        margin-bottom: 32px;
-    }
-    .download-button {
-      background-color: var(--primary-color);
-      color: white;
-      padding: 16px 48px;
-      border: none;
-      border-radius: 12px;
-      font-size: 20px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background-color 0.3s;
-      text-decoration: none;
-    }
-    .download-button:hover {
-      background-color: #005fcc;
     }
     .site-footer {
       background-color: #343a40;
@@ -160,6 +126,89 @@
       text-decoration: none;
       opacity: 0.9;
     }
+    .install-guide-section {
+      background-color: var(--bg-white);
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      padding: 48px 32px;
+      width: 100%;
+      text-align: left;
+    }
+    .install-guide-section h2 {
+      text-align: center;
+      font-size: 28px;
+      color: var(--primary-color);
+    }
+    .install-guide-section > p {
+      text-align: center;
+      font-size: 18px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+    .steps-container {
+      margin-top: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .step-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      background-color: var(--bg-light);
+      padding: 24px;
+      border-radius: 12px;
+      border-left: 5px solid var(--primary-color);
+    }
+    .step-number {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: var(--primary-color);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    .step-content h3 {
+      margin: 0 0 8px 0;
+      color: var(--text-main);
+      font-size: 20px;
+    }
+    .step-content p {
+      margin: 0;
+      font-size: 16px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .step-content .download-button {
+      margin-top: 16px;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 8px;
+    }
+    .step-content .note {
+      margin-top: 12px;
+      font-size: 14px;
+      color: #888;
+    }
+    .success-card {
+      border-left-color: #28a745;
+    }
+    .success-card .step-number {
+      background-color: #28a745;
+    }
+    code {
+      background-color: #e9ecef;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "Courier New", Courier, monospace;
+      color: #c7254e;
+    }
   </style>
 </head>
 <body>
@@ -176,13 +225,62 @@
     <a href="extension-download.html" class="nav-btn active">下载扩展</a>
   </nav>
   <main>
-    <div class="download-section">
-      <h2>下载Chrome扩展程序</h2>
-      <p>一键提取亚马逊产品页面的核心数据，包括标题、五点描述等，为您的Listing优化提供数据支持。</p>
-      <a href="amazon-product-extractor.zip" class="download-button" download>立即下载</a>
-      <div style="margin-top: 24px; color: var(--text-secondary);">
-        <p>下载后，请解压文件，并在Chrome浏览器中通过“加载已解压的扩展程序”进行安装。</p>
-        <p><strong>注意:</strong> 此下载链接需要您先在项目根目录运行 <code>node chrome-extension/create-extension-zip.js</code> 命令来生成 <code>amazon-product-extractor.zip</code> 文件。</p>
+    <div class="install-guide-section">
+      <h2>🚀 安装Chrome扩展程序</h2>
+      <p>只需简单几步，即可将我们的亚马逊数据提取工具添加到您的Chrome浏览器中。</p>
+      
+      <div class="steps-container">
+        
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h3>下载插件文件</h3>
+            <p>点击下方的按钮下载插件的 .zip 压缩文件。</p>
+            <a href="amazon-product-extractor.zip" class="download-button" download>📥 下载插件 (amazon-product-extractor.zip)</a>
+            <p class="note"><strong>注意:</strong> 此下载链接需要您先在项目根目录运行 <code>node chrome-extension/create-extension-zip.js</code> 命令来生成 <code>amazon-product-extractor.zip</code> 文件。</p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h3>解压文件</h3>
+            <p>找到您下载的 <code>amazon-product-extractor.zip</code> 文件，并将其解压到一个您容易找到的文件夹中。</p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h3>打开Chrome扩展页面</h3>
+            <p>在Chrome浏览器的地址栏中输入 <code>chrome://extensions</code> 并按回车键。或者，您也可以通过菜单 -> 更多工具 -> 扩展程序 来访问。</p>
+          </div>
+        </div>
+        
+        <div class="step-card">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h3>启用开发者模式</h3>
+            <p>在扩展程序页面的右上角，找到并打开“开发者模式”的开关。</p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">5</div>
+          <div class="step-content">
+            <h3>加载扩展程序</h3>
+            <p>点击页面左上角的“加载已解压的扩展程序”按钮。在弹出的文件选择窗口中，选择您在第二步中解压出来的那个文件夹。</p>
+          </div>
+        </div>
+
+        <div class="step-card success-card">
+          <div class="step-number">✅</div>
+          <div class="step-content">
+            <h3>安装完成！</h3>
+            <p>您现在应该可以在Chrome工具栏中看到我们的插件图标了。点击它，开始高效地提取亚马逊产品数据吧！</p>
+          </div>
+        </div>
+
       </div>
     </div>
   </main>
