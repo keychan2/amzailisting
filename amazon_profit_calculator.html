@@ -156,7 +156,8 @@
             grid-template-columns: repeat(3, 1fr);
         }
         
-        #product-info-section .grid-container {
+        #product-attributes-section .grid-container,
+        #product-costs-section .grid-container {
             grid-template-columns: repeat(4, 1fr);
         }
 
@@ -217,6 +218,36 @@
             padding: 12px;
             border: 1px solid var(--border-color);
             border-left: none;
+            width: 90px; /* Fixed width for currency dropdowns */
+            flex-shrink: 0; /* Prevent shrinking */
+        }
+
+        .textarea-wrapper {
+            position: relative;
+            display: flex;
+            width: 100%;
+        }
+
+        .clear-textarea-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ccc;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            font-size: 16px;
+            line-height: 22px;
+            text-align: center;
+            cursor: pointer;
+            display: none; /* Initially hidden */
+            transition: background-color 0.2s;
+        }
+
+        .clear-textarea-btn:hover {
+            background: #999;
         }
         
         .input-group input:focus, .input-group select:focus {
@@ -300,6 +331,7 @@
         .full-width { grid-column: 1 / -1; }
         .span-2 { grid-column: span 2; }
         .span-3 { grid-column: span 3; }
+        .span-4 { grid-column: span 4; }
 
         #fetch-status {
             font-size: 12px;
@@ -584,12 +616,43 @@
             cursor: pointer;
         }
 
+        summary {
+            cursor: pointer;
+            list-style: none; /* Hide the default arrow */
+        }
+
+        summary::-webkit-details-marker {
+            display: none; /* Hide the default arrow in Chrome */
+        }
+
+        summary h2 {
+            display: inline-block;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        summary h2::before {
+            content: '▶';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%) rotate(0deg);
+            transition: transform 0.2s;
+            font-size: 14px;
+        }
+
+        details[open] > summary h2::before {
+            transform: translateY(-50%) rotate(90deg);
+        }
+
         @media (max-width: 1200px) {
             #presets-section .grid-container,
-            #product-info-section .grid-container {
+            #product-attributes-section .grid-container,
+            #product-costs-section .grid-container {
                 grid-template-columns: repeat(2, 1fr);
             }
             .span-3 { grid-column: span 2; }
+            .span-4 { grid-column: span 2; }
         }
         
         @media (max-width: 992px) {
@@ -617,10 +680,11 @@
                 padding: 20px; 
             }
             #presets-section .grid-container,
-            #product-info-section .grid-container {
+            #product-attributes-section .grid-container,
+            #product-costs-section .grid-container {
                 grid-template-columns: 1fr;
             }
-            .span-2, .span-3 { grid-column: span 1; }
+            .span-2, .span-3, .span-4 { grid-column: span 1; }
             header h1 {
                 font-size: 22px;
             }
@@ -666,33 +730,42 @@
     <main>
         <div class="form-container">
             <section id="presets-section">
-                <h2>预设成本与规则</h2>
-                <div class="grid-container">
-                    <div class="input-group">
-                        <label for="exchangeRate">美元对人民币汇率</label>
-                        <input type="number" id="exchangeRate" value="7.25">
-                    </div>
-                    <div class="input-group">
-                        <label for="headHaulRate">头程物流单价 (CNY/kg)</label>
-                        <input type="number" id="headHaulRate" value="30">
-                    </div>
-                    <div class="input-group">
-                        <label>FBA计费规则</label>
-                        <div style="padding: 12px; border: 1px solid #eee; border-radius: 8px; background: #fafafa; font-size: 14px; height: 100%; box-sizing: border-box;">
-                            基于美站标准尺寸/大件的简化模型自动计算。
+                <details>
+                    <summary><h2>基础设置</h2></summary>
+                    <div class="grid-container" style="padding-top: 15px;">
+                        <div class="input-group">
+                            <label for="exchangeRate">美元对人民币汇率</label>
+                            <input type="number" id="exchangeRate" value="7.25">
+                        </div>
+                        <div class="input-group">
+                            <label for="headHaulRate">头程物流单价 (CNY/kg)</label>
+                            <input type="number" id="headHaulRate" value="30">
+                        </div>
+                        <div class="input-group">
+                            <label>FBA计费规则</label>
+                            <div style="padding: 12px; border: 1px solid #eee; border-radius: 8px; background: #fafafa; font-size: 14px; height: 100%; box-sizing: border-box;">
+                                基于美站标准尺寸/大件的简化模型自动计算。
+                            </div>
                         </div>
                     </div>
-                </div>
+                </details>
             </section>
 
-            <section id="product-info-section">
-                <h2>产品信息与成本</h2>
+            <section id="product-attributes-section" style="margin-top: 20px;">
+                <h2>产品属性</h2>
                 <div class="grid-container">
-                    <div class="input-group full-width">
+                    <div class="input-group span-4">
+                        <label for="productInfoPaste">粘贴产品信息</label>
+                        <div class="textarea-wrapper">
+                            <textarea id="productInfoPaste" rows="6" style="width: 100%; padding: 10px 40px 10px 10px; border-radius: 12px; border: 1px solid var(--border-color); font-size: 14px; background-color: var(--bg-light); color: var(--text-main); box-sizing: border-box; margin-bottom: 0;" placeholder="在此处粘贴从亚马逊页面复制的产品信息，系统将尝试自动填充以下字段。"></textarea>
+                            <button id="clearPasteBtn" class="clear-textarea-btn" onclick="clearPasteArea()">&times;</button>
+                        </div>
+                    </div>
+                    <div class="input-group span-4">
                         <label for="productName">产品名称</label>
                         <input type="text" id="productName" placeholder="例如: 智能颈部按摩仪">
                     </div>
-                    <div class="input-group full-width">
+                    <div class="input-group span-4">
                         <label for="competitorLink">参考竞品链接 (Chrome插件自动获取)</label>
                         <div class="input-wrapper">
                             <input type="url" id="competitorLink" placeholder="粘贴亚马逊商品链接">
@@ -756,13 +829,19 @@
                         <input type="number" id="prodHeight" placeholder="最短边">
                     </div>
 
-                    <div class="input-group span-2">
+                    <div class="input-group span-4">
                         <label for="sellingPrice">产品售价</label>
                         <div class="input-wrapper">
                             <input type="number" id="sellingPrice" placeholder="29.99">
                             <select id="sellingPriceCurrency"><option value="USD" selected>USD</option><option value="CNY">CNY</option></select>
                         </div>
                     </div>
+                </div>
+            </section>
+
+            <section id="product-costs-section" style="margin-top: 20px;">
+                <h2>产品成本</h2>
+                <div class="grid-container">
                     <div class="input-group span-2">
                         <label for="purchaseCost">产品采购成本</label>
                         <div class="input-wrapper">
@@ -787,7 +866,7 @@
                             <select id="adCostCurrency"><option value="USD" selected>USD</option><option value="CNY">CNY</option></select>
                         </div>
                     </div>
-                    <div class="input-group span-2">
+                    <div class="input-group span-4">
                         <label for="storageFee">其他成本 (仓储/包装等)</label>
                         <div class="input-wrapper">
                             <input type="number" id="storageFee" value="0">
@@ -904,8 +983,8 @@
         
         function getValueInUSD(id, exchangeRate) {
             const value = getValue(id);
-            const currency = document.getElementById(id + 'Currency').value;
-            if (currency === 'CNY') { return value / exchangeRate; }
+            const currencySelect = document.getElementById(id + 'Currency');
+            if (currencySelect && currencySelect.value === 'CNY') { return value / exchangeRate; }
             return value;
         }
         
@@ -929,6 +1008,106 @@
             } else {
                 const roundedWeight = Math.ceil(shippingWeight);
                 return FBA_FEES.oversize.base + (roundedWeight > 1 ? (roundedWeight - 1) * FBA_FEES.oversize.per_lb_over_1 : 0);
+            }
+        }
+        
+        function clearPasteArea() {
+            const pasteArea = document.getElementById('productInfoPaste');
+            pasteArea.value = '';
+            document.getElementById('clearPasteBtn').style.display = 'none';
+            // Clear all related fields
+            document.getElementById('productName').value = '';
+            document.getElementById('competitorLink').value = '';
+            document.getElementById('sellingPrice').value = '';
+            document.getElementById('prodWeight').value = '';
+            document.getElementById('prodLength').value = '';
+            document.getElementById('prodWidth').value = '';
+            document.getElementById('prodHeight').value = '';
+        }
+
+        function parseAndFillInfo() {
+            const text = document.getElementById('productInfoPaste').value;
+
+            const clearBtn = document.getElementById('clearPasteBtn');
+            if (text.length > 0) {
+                clearBtn.style.display = 'block';
+            } else {
+                clearBtn.style.display = 'none';
+            }
+
+            if (!text) return;
+
+            // Using regex to find key-value pairs
+            const extractValue = (key) => {
+                const regex = new RegExp(`^${key}:\\s*(.*)$`, 'im');
+                const match = text.match(regex);
+                return match ? match[1].trim() : null;
+            };
+
+            const name = extractValue('产品名称');
+            const weightStr = extractValue('重量');
+            const dimsStr = extractValue('尺寸');
+            const link = extractValue('链接');
+            const priceStr = extractValue('价格');
+            const asin = extractValue('ASIN');
+
+            if (name) {
+                document.getElementById('productName').value = name;
+            }
+
+            if (link) {
+                document.getElementById('competitorLink').value = link;
+            } else if (asin) {
+                document.getElementById('competitorLink').value = `https://www.amazon.com/dp/${asin}`;
+            }
+
+            if (priceStr) {
+                const priceMatch = priceStr.match(/[\d.]+/);
+                if (priceMatch) {
+                    document.getElementById('sellingPrice').value = parseFloat(priceMatch[0]);
+                }
+            }
+
+            if (weightStr) {
+                const weightMatch = weightStr.match(/([\d.]+)\s*(Pounds|lbs?|kg|g)/i);
+                if (weightMatch) {
+                    let weight = parseFloat(weightMatch[1]);
+                    const unit = weightMatch[2].toLowerCase();
+                    let weightInKg = 0;
+
+                    if (unit === 'pounds' || unit === 'lb' || unit === 'lbs') {
+                        weightInKg = weight * 0.453592;
+                    } else if (unit === 'kg') {
+                        weightInKg = weight;
+                    } else if (unit === 'g') {
+                        weightInKg = weight / 1000;
+                    }
+                    
+                    if (weightInKg > 0) {
+                        document.getElementById('prodWeight').value = weightInKg.toFixed(3);
+                    }
+                }
+            }
+
+            if (dimsStr) {
+                // Extracts all numbers from a string like '4.5"W x 9.2"H' -> ["4.5", "9.2"]
+                const dimValues = dimsStr.match(/[\d.]+/g);
+                if (dimValues) {
+                    // Assume inches if '"' is present, otherwise it's ambiguous, but we'll proceed assuming inches as per example
+                    const isImperial = dimsStr.includes('"');
+                    
+                    let dimsInCm = dimValues.map(v => parseFloat(v));
+                    if (isImperial) {
+                        dimsInCm = dimsInCm.map(d => d * 2.54);
+                    }
+
+                    // Sort descending to find longest, middle, shortest
+                    dimsInCm.sort((a, b) => b - a);
+                    
+                    document.getElementById('prodLength').value = dimsInCm[0] ? dimsInCm[0].toFixed(2) : '';
+                    document.getElementById('prodWidth').value = dimsInCm[1] ? dimsInCm[1].toFixed(2) : '';
+                    document.getElementById('prodHeight').value = dimsInCm[2] ? dimsInCm[2].toFixed(2) : '';
+                }
             }
         }
         
@@ -962,8 +1141,12 @@
             document.getElementById('profitMargin').textContent = `${profitMargin.toFixed(2)}%`;
             document.getElementById('roi').textContent = `${roi.toFixed(2)}%`;
             [ 'netProfitUsd', 'netProfitCny', 'profitMargin', 'roi'].forEach(id => {
-                const elem = document.getElementById(id).parentElement;
-                netProfitUsd < 0 ? elem.querySelector('.value').classList.add('negative') : elem.querySelector('.value').classList.remove('negative');
+                const elem = document.getElementById(id);
+                if (netProfitUsd < 0) {
+                    elem.classList.add('negative');
+                } else {
+                    elem.classList.remove('negative');
+                }
             });
 
             // Add to history
@@ -995,68 +1178,16 @@
                 return;
             }
             
-            // 检查是否安装了插件
-            if (!isExtensionInstalled()) {
-                // statusEl.textContent = '请先安装Chrome插件！点击上方"下载插件文件"按钮。';
-                // statusEl.style.color = '#dc3545';
-                // showInstallGuide();
-                // return;
-                console.warn('未检测到Chrome插件，将直接尝试打开链接。');
-            }
+            console.warn('未检测到Chrome插件，将直接尝试打开链接。');
             
             statusEl.textContent = '正在跳转到Amazon页面，请在新页面中使用插件提取信息...';
             statusEl.style.color = '#007bff';
             
-            // 在新标签页中打开Amazon链接
-            const newWindow = window.open(url, '_blank');
-            
-            // 设置一个标识，表示用户是从利润计算器跳转过去的
-            localStorage.setItem('calculatorReturnUrl', window.location.href);
-            localStorage.setItem('extractionInProgress', 'true');
-            
-            // 监听插件返回的数据
-            const checkInterval = setInterval(() => {
-                const extractionData = localStorage.getItem('amazonProductData');
-                if (extractionData) {
-                    clearInterval(checkInterval);
-                    statusEl.textContent = '成功接收到产品信息！';
-                    statusEl.style.color = '#28a745';
-                    
-                    // 处理接收到的数据
-                    receiveExtensionData();
-                    
-                    // 清理标识
-                    localStorage.removeItem('extractionInProgress');
-                }
-            }, 1000);
-            
-            // 30秒后停止监听
-            setTimeout(() => {
-                clearInterval(checkInterval);
-                if (localStorage.getItem('extractionInProgress')) {
-                    statusEl.textContent = '等待超时。请确保已安装插件并在Amazon页面中点击插件图标。';
-                    statusEl.style.color = '#ffc107';
-                    localStorage.removeItem('extractionInProgress');
-                }
-            }, 30000);
-        }
-        
-        function isExtensionInstalled() {
-            // 简单检查：看是否有插件设置的标识
-            return localStorage.getItem('amazonExtensionInstalled') === 'true';
+            window.open(url, '_blank');
         }
         
         function downloadExtension() {
-            // 创建一个包含所有插件文件的zip下载
-            const statusEl = document.getElementById('fetch-status');
-            statusEl.textContent = '插件文件已准备好，请按照安装教程进行安装。';
-            statusEl.style.color = '#007bff';
-            
-            // 显示安装指南
-            showInstallGuide();
-            
-            // 这里可以添加实际的文件下载逻辑
-            alert('插件文件下载功能开发中。请联系管理员获取插件文件。\n\n或者您可以按照以下步骤手动创建插件：\n1. 创建chrome-extension文件夹\n2. 复制manifest.json等文件\n3. 在Chrome中加载已解压的扩展程序');
+            alert('插件文件下载功能开发中。请联系管理员获取插件文件。');
         }
         
         function showInstallGuide() {
@@ -1092,223 +1223,6 @@
                 </div>
             `;
             document.body.appendChild(guideModal);
-        }
-
-        // --- Legacy Amazon Data Fetching Logic (Fallback) ---
-        async function fetchProductInfo() {
-            const statusEl = document.getElementById('fetch-status');
-            statusEl.textContent = '建议使用Chrome插件进行信息提取，成功率更高！';
-            statusEl.style.color = '#ffc107';
-            
-            // 显示手动输入提示
-            showManualInputHelp();
-        }
-
-        function parseProductInfo(doc) {
-            console.log('开始解析产品信息...');
-            
-            let foundDim = false;
-            let foundWt = false;
-            
-            // 方法1: 尝试从详细信息区域解析
-            const result1 = parseFromDetailBullets(doc);
-            foundDim = result1.foundDim || foundDim;
-            foundWt = result1.foundWt || foundWt;
-            
-            // 方法2: 尝试从技术详情表格解析
-            if (!foundDim || !foundWt) {
-                const result2 = parseFromTechDetails(doc);
-                foundDim = result2.foundDim || foundDim;
-                foundWt = result2.foundWt || foundWt;
-            }
-            
-            // 方法3: 尝试从产品特性区域解析
-            if (!foundDim || !foundWt) {
-                const result3 = parseFromFeatures(doc);
-                foundDim = result3.foundDim || foundDim;
-                foundWt = result3.foundWt || foundWt;
-            }
-            
-            // 方法4: 尝试从JSON-LD结构化数据解析
-            if (!foundDim || !foundWt) {
-                const result4 = parseFromStructuredData(doc);
-                foundDim = result4.foundDim || foundDim;
-                foundWt = result4.foundWt || foundWt;
-            }
-            
-            console.log(`解析结果: 尺寸=${foundDim}, 重量=${foundWt}`);
-            return foundDim || foundWt;
-        }
-
-        function parseFromDetailBullets(doc) {
-            const detailList = doc.querySelector('#detailBullets_feature_div ul');
-            if (!detailList) return { foundDim: false, foundWt: false };
-
-            let dimensionsStr = '';
-            let weightStr = '';
-
-            const listItems = detailList.querySelectorAll('li');
-            listItems.forEach(li => {
-                const boldSpan = li.querySelector('span.a-text-bold');
-                if (boldSpan) {
-                    const label = boldSpan.textContent.trim().toLowerCase();
-                    const valueSpan = boldSpan.parentElement.querySelectorAll('span')[1];
-                    if (!valueSpan) return;
-
-                    if (label.includes('dimensions') || label.includes('product dimensions')) {
-                        dimensionsStr = valueSpan.textContent.trim();
-                    }
-                    if (label.includes('item weight') || label.includes('weight')) {
-                        weightStr = valueSpan.textContent.trim();
-                    }
-                }
-            });
-
-            let foundDim = false;
-            let foundWt = false;
-
-            if (dimensionsStr) {
-                foundDim = parseDimensions(dimensionsStr);
-            }
-            
-            if (weightStr) {
-                foundWt = parseAndSetWeight(weightStr);
-            }
-            
-            return { foundDim, foundWt };
-        }
-        
-        function parseFromTechDetails(doc) {
-            let foundDim = false;
-            let foundWt = false;
-            
-            // 查找技术详情表格
-            const tables = doc.querySelectorAll('table');
-            tables.forEach(table => {
-                const rows = table.querySelectorAll('tr');
-                rows.forEach(row => {
-                    const cells = row.querySelectorAll('td, th');
-                    if (cells.length >= 2) {
-                        const label = cells[0].textContent.trim().toLowerCase();
-                        const value = cells[1].textContent.trim();
-                        
-                        if ((label.includes('dimensions') || label.includes('size')) && !foundDim) {
-                            foundDim = parseDimensions(value);
-                        }
-                        if ((label.includes('weight') || label.includes('重量')) && !foundWt) {
-                            foundWt = parseAndSetWeight(value);
-                        }
-                    }
-                });
-            });
-            
-            return { foundDim, foundWt };
-        }
-        
-        function parseFromFeatures(doc) {
-            let foundDim = false;
-            let foundWt = false;
-            
-            // 查找产品特性区域
-            const featureSelectors = [
-                '#feature-bullets ul li',
-                '.a-unordered-list .a-list-item',
-                '[data-feature-name] .a-list-item'
-            ];
-            
-            featureSelectors.forEach(selector => {
-                const items = doc.querySelectorAll(selector);
-                items.forEach(item => {
-                    const text = item.textContent.toLowerCase();
-                    if ((text.includes('dimensions') || text.includes('size')) && !foundDim) {
-                        foundDim = parseDimensions(item.textContent);
-                    }
-                    if (text.includes('weight') && !foundWt) {
-                        foundWt = parseAndSetWeight(item.textContent);
-                    }
-                });
-            });
-            
-            return { foundDim, foundWt };
-        }
-        
-        function parseFromStructuredData(doc) {
-            let foundDim = false;
-            let foundWt = false;
-            
-            // 查找JSON-LD结构化数据
-            const scripts = doc.querySelectorAll('script[type="application/ld+json"]');
-            scripts.forEach(script => {
-                try {
-                    const data = JSON.parse(script.textContent);
-                    if (data.offers && data.offers.length > 0) {
-                        const offer = data.offers[0];
-                        if (offer.itemOffered) {
-                            const item = offer.itemOffered;
-                            if (item.weight && !foundWt) {
-                                foundWt = parseAndSetWeight(item.weight);
-                            }
-                            if (item.dimensions && !foundDim) {
-                                foundDim = parseDimensions(JSON.stringify(item.dimensions));
-                            }
-                        }
-                    }
-                } catch (e) {
-                    // 忽略JSON解析错误
-                }
-            });
-            
-            return { foundDim, foundWt };
-        }
-        
-        function parseDimensions(dimensionsStr) {
-            if (!dimensionsStr) return false;
-            
-            // 支持多种格式的尺寸解析
-            const patterns = [
-                /(\d+\.?\d*)\s*[x×]\s*(\d+\.?\d*)\s*[x×]\s*(\d+\.?\d*)\s*(inches?|in|cm|centimeters?)/i,
-                /(\d+\.?\d*)\s*[x×]\s*(\d+\.?\d*)\s*[x×]\s*(\d+\.?\d*)/i,
-                /长[：:]\s*(\d+\.?\d*)\s*cm.*宽[：:]\s*(\d+\.?\d*)\s*cm.*高[：:]\s*(\d+\.?\d*)\s*cm/i
-            ];
-            
-            for (const pattern of patterns) {
-                const match = dimensionsStr.match(pattern);
-                if (match) {
-                    let l = parseFloat(match[1]);
-                    let w = parseFloat(match[2]);
-                    let h = parseFloat(match[3]);
-                    
-                    // 单位转换
-                    if (match[4] && (match[4].toLowerCase().includes('inch') || match[4].toLowerCase().includes('in'))) {
-                        l *= 2.54; w *= 2.54; h *= 2.54;
-                    }
-                    
-                    // 按大小排序
-                    const dims = [l, w, h].sort((a,b) => b-a);
-                    document.getElementById('prodLength').value = dims[0].toFixed(2);
-                    document.getElementById('prodWidth').value = dims[1].toFixed(2);
-                    document.getElementById('prodHeight').value = dims[2].toFixed(2);
-                    
-                    return true;
-                }
-            }
-            
-            return false;
-        }
-
-        function parseAndSetWeight(text) {
-            if (!text) return false;
-            const weightMatch = text.match(/(\d+\.?\d*)\s*(pounds|ounces|kg|kilograms|g|grams)/i);
-            if (weightMatch) {
-                let weight = parseFloat(weightMatch[1]);
-                const unit = weightMatch[2].toLowerCase();
-                if (unit === 'pounds') weight *= 0.453592;
-                if (unit === 'ounces') weight *= 0.0283495;
-                if (unit === 'g' || unit === 'grams') weight /= 1000;
-                document.getElementById('prodWeight').value = weight.toFixed(3);
-                return true;
-            }
-            return false;
         }
 
         function showManualInputHelp() {
@@ -1376,6 +1290,9 @@
 
         function addHistoryRecord(record) {
             calculationHistory.unshift(record);
+            if (calculationHistory.length > 50) { // Limit history size
+                calculationHistory.pop();
+            }
             saveHistory();
             renderHistory();
         }
@@ -1398,10 +1315,10 @@
             if (!str) return '';
             return str.replace(/[&<>"']/g, function(match) {
                 return {
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;',
-                    '"': '&quot;',
+                    '&': '&',
+                    '<': '<',
+                    '>': '>',
+                    '"': '"',
                     "'": '&#39;'
                 }[match];
             });
@@ -1424,7 +1341,7 @@
                     record.purchaseCost,
                     record.headHaulCostCny || 'N/A',
                     record.fbaFeeCny || 'N/A',
-                    record.netProfitCny || record.netProfitUsd || 'N/A',
+                    record.netProfitCny || 'N/A',
                     record.profitMargin
                 ];
                 csvContent += row.join(',') + '\n';
@@ -1441,88 +1358,29 @@
             document.body.removeChild(link);
         }
 
-        // 接收Chrome扩展数据
-        function receiveExtensionData() {
-            // 检查localStorage中是否有扩展数据
-            const extensionData = localStorage.getItem('amazonProductData');
-            if (extensionData) {
-                try {
-                    const data = JSON.parse(extensionData);
-                    fillFormWithExtensionData(data);
-                    
-                    // 显示成功消息
-                    const statusEl = document.getElementById('fetch-status');
-                    if (statusEl) {
-                        statusEl.textContent = '已从Chrome扩展接收产品信息！';
-                        statusEl.style.color = '#28a745';
-                    }
-                    
-                    // 清除数据避免重复使用
-                    localStorage.removeItem('amazonProductData');
-                } catch (error) {
-                    console.error('解析扩展数据失败:', error);
-                }
-            }
-        }
-
         // 用扩展数据填充表单
         function fillFormWithExtensionData(data) {
             console.log('接收到扩展数据:', data);
             
-            // 填充产品名称
-            if (data.title) {
-                document.getElementById('productName').value = data.title;
-            }
+            if (data.title) document.getElementById('productName').value = data.title;
+            if (data.weightKg > 0) document.getElementById('prodWeight').value = data.weightKg.toFixed(3);
+            if (data.length > 0) document.getElementById('prodLength').value = data.length.toFixed(2);
+            if (data.width > 0) document.getElementById('prodWidth').value = data.width.toFixed(2);
+            if (data.height > 0) document.getElementById('prodHeight').value = data.height.toFixed(2);
+            if (data.url) document.getElementById('competitorLink').value = data.url;
             
-            // 填充重量
-            if (data.weightKg && data.weightKg > 0) {
-                document.getElementById('prodWeight').value = data.weightKg.toFixed(3);
-            }
-            
-            // 填充尺寸
-            if (data.length && data.length > 0) {
-                document.getElementById('prodLength').value = data.length.toFixed(2);
-            }
-            if (data.width && data.width > 0) {
-                document.getElementById('prodWidth').value = data.width.toFixed(2);
-            }
-            if (data.height && data.height > 0) {
-                document.getElementById('prodHeight').value = data.height.toFixed(2);
-            }
-            
-            // 填充链接
-            if (data.url) {
-                document.getElementById('competitorLink').value = data.url;
-            }
-            
-            // 隐藏手动输入提示
             const helpDiv = document.getElementById('manual-help');
-            if (helpDiv) {
-                helpDiv.style.display = 'none';
-            }
+            if (helpDiv) helpDiv.style.display = 'none';
         }
 
         // 监听来自扩展的实时消息
         window.addEventListener('message', function(event) {
             if (event.data && event.data.type === 'AMAZON_PRODUCT_DATA') {
                 fillFormWithExtensionData(event.data.data);
-                
                 const statusEl = document.getElementById('fetch-status');
                 if (statusEl) {
                     statusEl.textContent = '已接收Chrome扩展数据！';
                     statusEl.style.color = '#28a745';
-                }
-            }
-        });
-
-        // 监听localStorage变化
-        window.addEventListener('storage', function(e) {
-            if (e.key === 'amazonProductData' && e.newValue) {
-                try {
-                    const data = JSON.parse(e.newValue);
-                    fillFormWithExtensionData(data);
-                } catch (error) {
-                    console.error('解析存储数据失败:', error);
                 }
             }
         });
@@ -1549,12 +1407,9 @@
             loadPresetCosts();
             loadHistory();
             
-            // 检查是否有扩展数据
-            receiveExtensionData();
-            
-            // Add event listeners to save presets on change
             document.getElementById('exchangeRate').addEventListener('input', savePresetCosts);
             document.getElementById('headHaulRate').addEventListener('input', savePresetCosts);
+            document.getElementById('productInfoPaste').addEventListener('input', parseAndFillInfo);
         });
 
     </script>
