@@ -645,6 +645,27 @@
             transform: translateY(-50%) rotate(90deg);
         }
 
+        .required-star {
+            color: #dc3545;
+            margin-left: 2px;
+        }
+
+        .input-error {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.2);
+        }
+
+        /* Style for the wrapper when it contains an invalid input */
+        .input-wrapper.input-error {
+            box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.2);
+            border-radius: 12px;
+        }
+
+        .input-wrapper.input-error > input,
+        .input-wrapper.input-error > select {
+            border-color: #dc3545 !important;
+        }
+
         @media (max-width: 1200px) {
             #presets-section .grid-container,
             #product-attributes-section .grid-container,
@@ -813,24 +834,24 @@
                     </div>
                     
                     <div class="input-group">
-                        <label for="prodWeight">产品重量 (kg)</label>
+                        <label for="prodWeight">产品重量 (kg)<span class="required-star">*</span></label>
                         <input type="number" id="prodWeight" placeholder="0.8">
                     </div>
                     <div class="input-group">
-                        <label for="prodLength">长 (cm)</label>
+                        <label for="prodLength">长 (cm)<span class="required-star">*</span></label>
                         <input type="number" id="prodLength" placeholder="最长边">
                     </div>
                     <div class="input-group">
-                        <label for="prodWidth">宽 (cm)</label>
+                        <label for="prodWidth">宽 (cm)<span class="required-star">*</span></label>
                         <input type="number" id="prodWidth" placeholder="中间边">
                     </div>
                     <div class="input-group">
-                        <label for="prodHeight">高 (cm)</label>
+                        <label for="prodHeight">高 (cm)<span class="required-star">*</span></label>
                         <input type="number" id="prodHeight" placeholder="最短边">
                     </div>
 
                     <div class="input-group span-4">
-                        <label for="sellingPrice">产品售价</label>
+                        <label for="sellingPrice">产品售价<span class="required-star">*</span></label>
                         <div class="input-wrapper">
                             <input type="number" id="sellingPrice" placeholder="29.99">
                             <select id="sellingPriceCurrency"><option value="USD" selected>USD</option><option value="CNY">CNY</option></select>
@@ -843,7 +864,7 @@
                 <h2>产品成本</h2>
                 <div class="grid-container">
                     <div class="input-group span-2">
-                        <label for="purchaseCost">产品采购成本</label>
+                        <label for="purchaseCost">产品采购成本<span class="required-star">*</span></label>
                         <div class="input-wrapper">
                             <input type="number" id="purchaseCost" placeholder="35.00">
                             <select id="purchaseCostCurrency"><option value="USD">USD</option><option value="CNY" selected>CNY</option></select>
@@ -851,7 +872,7 @@
                     </div>
                     
                     <div class="input-group span-2">
-                        <label for="referralFee">销售佣金率 (%)</label>
+                        <label for="referralFee">销售佣金率 (%)<span class="required-star">*</span></label>
                         <input type="number" id="referralFee" value="15">
                     </div>
                     <div class="input-group span-2">
@@ -974,9 +995,30 @@
 
     <script>
         // --- FBA & Cost Calculation Logic ---
-        const FBA_FEES = {
-            standard: { 0.25: 3.22, 0.5: 3.40, 0.75: 3.58, 1.0: 3.77, 1.5: 4.15, 2.0: 4.53, 2.5: 4.93, 3.0: 5.43, over_3_base: 5.43, over_3_per_lb: 0.38 },
-            oversize: { base: 9.73, per_lb_over_1: 0.42 }
+        // Updated FBA Rates for 2024 (US, Non-Apparel)
+        const FBA_RATES_2024 = {
+            small_standard: [
+                { max_oz: 4, fee: 3.86 },
+                { max_oz: 8, fee: 4.08 },
+                { max_oz: 12, fee: 4.24 },
+                { max_oz: 16, fee: 4.75 }
+            ],
+            large_standard: [
+                { max_lb: 4/16, fee: 4.56 }, // 4 oz
+                { max_lb: 8/16,  fee: 4.81 }, // 8 oz
+                { max_lb: 12/16, fee: 5.15 }, // 12 oz
+                { max_lb: 1,    fee: 5.80 }, // 16 oz
+                { max_lb: 1.5,  fee: 6.37 },
+                { max_lb: 2,    fee: 6.91 },
+                { max_lb: 2.5,  fee: 7.17 },
+                { max_lb: 3,    fee: 7.59 }
+            ],
+            large_standard_over_3_lb: { base_fee: 7.59, per_lb_over: 0.42, base_lb: 3 },
+            oversize: { // Simplified to Small Oversize
+                base_fee: 9.73,
+                per_lb_over: 0.42,
+                base_lb: 1
+            }
         };
         
         function getValue(id) { return parseFloat(document.getElementById(id).value) || 0; }
@@ -988,27 +1030,79 @@
             return value;
         }
         
-        function calculateHeadHaulCost(weightKg, rateCnyPerKg, exchangeRate) {
-            if (weightKg <= 0 || rateCnyPerKg <= 0) return 0;
-            return (weightKg * rateCnyPerKg) / exchangeRate;
-        }
-        
-        function calculateFbaFee(weightKg, lengthCm, widthCm, heightCm) {
-            if (weightKg <= 0 || lengthCm <= 0 || widthCm <= 0 || heightCm <= 0) return 0;
-            const weightLb = weightKg * 2.20462;
-            const dims = [(lengthCm / 2.54), (widthCm / 2.54), (heightCm / 2.54)].sort((a, b) => b - a);
-            let tier = (dims[0] > 18 || dims[1] > 14 || dims[2] > 8 || weightLb > 20) ? 'oversize' : 'standard';
-            let shippingWeight = Math.max(weightLb, (dims[0] * dims[1] * dims[2]) / 139);
-            if (tier === 'standard') {
-                 const weightTiers = Object.keys(FBA_FEES.standard).filter(k => !k.startsWith('over')).map(parseFloat);
-                 for (const tierWeight of weightTiers) {
-                     if (shippingWeight <= tierWeight) return FBA_FEES.standard[tierWeight.toString()];
-                 }
-                 return FBA_FEES.standard.over_3_base + Math.ceil(shippingWeight - 3) * FBA_FEES.standard.over_3_per_lb;
-            } else {
-                const roundedWeight = Math.ceil(shippingWeight);
-                return FBA_FEES.oversize.base + (roundedWeight > 1 ? (roundedWeight - 1) * FBA_FEES.oversize.per_lb_over_1 : 0);
+        function calculateHeadHaulCost(weightKg, lengthCm, widthCm, heightCm, rateCnyPerKg, exchangeRate) {
+            if (rateCnyPerKg <= 0) return 0;
+            const actualWeight = weightKg > 0 ? weightKg : 0;
+            let volumetricWeight = 0;
+            if (lengthCm > 0 && widthCm > 0 && heightCm > 0) {
+                volumetricWeight = (lengthCm * widthCm * heightCm) / 6000;
             }
+            const chargeableWeight = Math.max(actualWeight, volumetricWeight);
+            if (chargeableWeight <= 0) return 0;
+            return (chargeableWeight * rateCnyPerKg) / exchangeRate;
+        }
+
+        function calculateFbaFee(weightKg, lengthCm, widthCm, heightCm) {
+            if (weightKg <= 0 || lengthCm <= 0 || widthCm <= 0 || heightCm <= 0) {
+                return 0;
+            }
+
+            const IN_PER_CM = 0.393701;
+            const LB_PER_KG = 2.20462;
+
+            const weightLb = weightKg * LB_PER_KG;
+            
+            const dimsIn = [lengthCm * IN_PER_CM, widthCm * IN_PER_CM, heightCm * IN_PER_CM].sort((a, b) => b - a);
+            const [longest, median, shortest] = dimsIn;
+
+            // 1. Determine Size Tier
+            let tier = 'oversize';
+            if (longest <= 15 && median <= 12 && shortest <= 0.75 && weightLb <= 1) {
+                tier = 'small_standard';
+            } else if (longest <= 18 && median <= 14 && shortest <= 8 && weightLb <= 20) {
+                tier = 'large_standard';
+            }
+
+            // 2. Calculate Shipping Weight
+            const dimensionalWeightLb = (longest * median * shortest) / 139;
+            let shippingWeightLb = weightLb;
+            if (tier === 'large_standard' && weightLb > 0.75) {
+                shippingWeightLb = Math.max(weightLb, dimensionalWeightLb);
+            } else if (tier === 'oversize') {
+                shippingWeightLb = Math.max(weightLb, dimensionalWeightLb);
+            }
+
+            // 3. Calculate Fee based on Tier and Shipping Weight
+            if (tier === 'small_standard') {
+                const shippingWeightOz = shippingWeightLb * 16;
+                for (const rate of FBA_RATES_2024.small_standard) {
+                    if (shippingWeightOz <= rate.max_oz) return rate.fee;
+                }
+                return FBA_RATES_2024.small_standard[FBA_RATES_2024.small_standard.length - 1].fee;
+            }
+
+            if (tier === 'large_standard') {
+                if (shippingWeightLb > 3 && shippingWeightLb <= 20) {
+                    const rules = FBA_RATES_2024.large_standard_over_3_lb;
+                    const additionalWeightInLb = Math.ceil(shippingWeightLb - rules.base_lb);
+                    return rules.base_fee + additionalWeightInLb * rules.per_lb_over;
+                }
+                for (const rate of FBA_RATES_2024.large_standard) {
+                    if (shippingWeightLb <= rate.max_lb) return rate.fee;
+                }
+                // Fallback for weights between last tier and 3lb
+                return FBA_RATES_2024.large_standard[FBA_RATES_2024.large_standard.length - 1].fee;
+            }
+
+            if (tier === 'oversize') {
+                // Using a simplified Small Oversize rule for items > 20 lb or large dimensions
+                const rules = FBA_RATES_2024.oversize;
+                const roundedWeight = Math.ceil(shippingWeightLb);
+                const additionalWeight = roundedWeight > rules.base_lb ? roundedWeight - rules.base_lb : 0;
+                return rules.base_fee + additionalWeight * rules.per_lb_over;
+            }
+
+            return 0; // Should not be reached
         }
         
         function clearPasteArea() {
@@ -1112,8 +1206,37 @@
         }
         
         function calculateProfit() {
+            const requiredFieldIds = ['prodWeight', 'prodLength', 'prodWidth', 'prodHeight', 'sellingPrice', 'purchaseCost', 'referralFee'];
+            let isValid = true;
+
+            // First, clear all existing error states from inputs and their wrappers
+            document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
+
+            requiredFieldIds.forEach(id => {
+                const inputElement = document.getElementById(id);
+                if (!inputElement.value.trim()) {
+                    // Target the wrapper if it exists, otherwise the input itself
+                    const wrapper = inputElement.closest('.input-wrapper');
+                    const targetElement = wrapper || inputElement;
+                    targetElement.classList.add('input-error');
+                    isValid = false;
+                }
+            });
+
+            if (!isValid) {
+                alert('请填写所有带红色星号 (*) 的必填项。');
+                return;
+            }
+
             const exchangeRate = getValue('exchangeRate');
-            if (!exchangeRate || exchangeRate <= 0) { alert('请输入一个有效的正数汇率！'); return; }
+            if (!exchangeRate || exchangeRate <= 0) { 
+                alert('请输入一个有效的正数汇率！'); 
+                document.getElementById('exchangeRate').classList.add('input-error');
+                return; 
+            } else {
+                document.getElementById('exchangeRate').classList.remove('input-error');
+            }
+            
             const prodWeight = getValue('prodWeight');
             const prodLength = getValue('prodLength');
             const prodWidth = getValue('prodWidth');
@@ -1122,10 +1245,9 @@
             const purchaseCost = getValueInUSD('purchaseCost', exchangeRate);
             const adCost = getValueInUSD('adCost', exchangeRate);
             const storageFee = getValueInUSD('storageFee', exchangeRate);
-            const headHaulCost = calculateHeadHaulCost(prodWeight, getValue('headHaulRate'), exchangeRate);
+            const headHaulCost = calculateHeadHaulCost(prodWeight, prodLength, prodWidth, prodHeight, getValue('headHaulRate'), exchangeRate);
             const fbaFee = calculateFbaFee(prodWeight, prodLength, prodWidth, prodHeight);
-            if (sellingPrice === 0) { alert('请输入产品售价！'); return; }
-            if (fbaFee === 0 && prodWeight > 0) { console.warn('无法计算FBA费用，请检查产品尺寸和重量。'); }
+            
             const referralFee = sellingPrice * (getValue('referralFee') / 100);
             const refundCost = sellingPrice * (getValue('refundRate') / 100);
             const totalCost = purchaseCost + headHaulCost + fbaFee + referralFee + adCost + storageFee + refundCost;
@@ -1134,12 +1256,14 @@
             const profitMargin = (sellingPrice > 0) ? (netProfitUsd / sellingPrice) * 100 : 0;
             const totalInvestment = purchaseCost + headHaulCost;
             const roi = (totalInvestment > 0) ? (netProfitUsd / totalInvestment) * 100 : 0;
+            
             document.getElementById('headHaulCostResult').textContent = `${headHaulCost.toFixed(2)} USD`;
             document.getElementById('fbaFeeResult').textContent = `${fbaFee.toFixed(2)} USD`;
             document.getElementById('netProfitUsd').textContent = `${netProfitUsd.toFixed(2)} USD`;
             document.getElementById('netProfitCny').textContent = `¥${netProfitCny.toFixed(2)}`;
             document.getElementById('profitMargin').textContent = `${profitMargin.toFixed(2)}%`;
             document.getElementById('roi').textContent = `${roi.toFixed(2)}%`;
+            
             [ 'netProfitUsd', 'netProfitCny', 'profitMargin', 'roi'].forEach(id => {
                 const elem = document.getElementById(id);
                 if (netProfitUsd < 0) {
