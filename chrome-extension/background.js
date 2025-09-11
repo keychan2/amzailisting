@@ -1,65 +1,40 @@
-// 监听来自 popup.js 的消息
+// Background script for Amazon Product Extractor
+console.log('Background script loaded');
+
+// 监听扩展安装事件
+chrome.runtime.onInstalled.addListener((details) => {
+    console.log('Extension installed/updated:', details);
+});
+
+// 监听来自content script的消息
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'analyze') {
-    // 获取当前活动的标签页
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs[0] && tabs[0].id) {
-        // 注入 content.js 脚本到页面
-        chrome.scripting.executeScript({
-          target: { tabId: tabs[0].id },
-          files: ['content.js']
-        });
-      } else {
-        console.error("Could not find active tab to inject script.");
-      }
-    });
-  } else if (request.action === 'priceData') {
-    const prices = request.data;
-    if (!prices || prices.length === 0) {
-      chrome.runtime.sendMessage({
-        action: 'displayResults',
-        data: { totalCount: 0, priceRanges: {}, averagePrice: 0 }
-      });
-      return;
-    }
-
-    const totalCount = prices.length;
-    const sum = prices.reduce((a, b) => a + b, 0);
-    const averagePrice = sum / totalCount;
-    const interval = 5; // Set interval to 5
-
-    // Dynamically create and populate price ranges
-    const tempRanges = {};
-    prices.forEach(price => {
-      const lowerBound = Math.floor(price / interval) * interval;
-      const upperBound = lowerBound + interval;
-      const rangeKey = `${lowerBound}-${upperBound}`;
-      
-      if (!tempRanges[rangeKey]) {
-        tempRanges[rangeKey] = { count: 0 };
-      }
-      tempRanges[rangeKey].count++;
-    });
-
-    // Sort the range keys numerically
-    const sortedKeys = Object.keys(tempRanges).sort((a, b) => {
-      return parseInt(a.split('-')[0]) - parseInt(b.split('-')[0]);
-    });
-
-    // Build the final priceRanges object with percentages
-    const priceRanges = {};
-    for (const key of sortedKeys) {
-      const count = tempRanges[key].count;
-      priceRanges[key] = {
-        count,
-        percentage: (count / totalCount) * 100
-      };
+    console.log('Background received message:', request);
+    
+    if (request.action === 'contentScriptLoaded') {
+        console.log('Content script loaded in tab:', sender.tab?.id);
+        sendResponse({ success: true });
     }
     
-    // Send results back to popup
-    chrome.runtime.sendMessage({
-      action: 'displayResults',
-      data: { averagePrice, priceRanges, totalCount }
-    });
-  }
+    return true;
+});
+
+// 监听标签页更新事件
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    // 当页面完全加载后，如果是Amazon页面，确保content script已注入
+    if (changeInfo.status === 'complete' && tab.url && tab.url.includes('amazon.')) {
+        console.log('Amazon page loaded:', tab.url);
+        
+        // 延迟注入content script以确保页面完全加载
+        setTimeout(async () => {
+            try {
+                await chrome.scripting.executeScript({
+                    target: { tabId: tabId },
+                    files: ['content.js']
+                });
+                console.log('Content script injected into tab:', tabId);
+            } catch (error) {
+                console.log('Failed to inject content script:', error);
+            }
+        }, 1000);
+    }
 });
