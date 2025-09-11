@@ -1,28 +1,36 @@
 {
   "manifest_version": 3,
-  "name": "Amazon产品信息提取器",
+  "name": "亚马逊价格分析器",
   "version": "1.0",
-  "description": "一键提取Amazon产品的尺寸和重量信息",
+  "description": "分析亚马逊页面上的商品价格，计算平均价和价格区间比例。",
   "permissions": [
     "activeTab",
-    "storage"
+    "scripting"
   ],
   "host_permissions": [
-    "https://*.amazon.com/*"
+    "*://*.amazon.com/*",
+    "*://*.amazon.cn/*",
+    "*://*.amazon.co.uk/*",
+    "*://*.amazon.de/*",
+    "*://*.amazon.fr/*",
+    "*://*.amazon.it/*",
+    "*://*.amazon.es/*",
+    "*://*.amazon.co.jp/*"
   ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "提取产品信息"
-  },
-  "content_scripts": [
-    {
-      "matches": ["https://*.amazon.com/*"],
-      "js": ["content.js"]
+    "default_icon": {
+      "16": "images/icon16.png",
+      "48": "images/icon48.png",
+      "128": "images/icon128.png"
     }
-  ],
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
   "icons": {
-    "16": "icon16.png",
-    "48": "icon48.png",
-    "128": "icon128.png"
+    "16": "images/icon16.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
   }
 }

@@ -1,111 +1,65 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const extractBtn = document.getElementById('extractBtn');
-    const status = document.getElementById('status');
-    const productInfo = document.getElementById('productInfo');
-    const openCalculatorBtn = document.getElementById('openCalculator');
-    
-    // 设置插件安装标识
-    localStorage.setItem('amazonExtensionInstalled', 'true');
-    
-    // 显示状态消息
-    function showStatus(message, type = 'info') {
-        status.textContent = message;
-        status.className = `status ${type}`;
-        status.style.display = 'block';
-        
-        if (type === 'success' || type === 'error') {
-            setTimeout(() => {
-                status.style.display = 'none';
-            }, 3000);
-        }
+document.addEventListener('DOMContentLoaded', () => {
+  const analyzeBtn = document.getElementById('analyzeBtn');
+  const resultDiv = document.getElementById('result');
+  const summaryDiv = document.getElementById('summary');
+  const chartContainer = document.getElementById('chart-container');
+
+  analyzeBtn.addEventListener('click', () => {
+    analyzeBtn.textContent = '正在分析...';
+    analyzeBtn.disabled = true;
+    resultDiv.style.display = 'none';
+    chartContainer.innerHTML = ''; // Clear previous results
+    summaryDiv.innerHTML = ''; // Clear previous summary
+
+    chrome.runtime.sendMessage({ action: 'analyze' });
+  });
+
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === 'displayResults') {
+      analyzeBtn.textContent = '分析当前页面价格';
+      analyzeBtn.disabled = false;
+
+      const { averagePrice, priceRanges, totalCount } = message.data;
+      
+      resultDiv.style.display = 'block';
+
+      if (totalCount === 0) {
+        summaryDiv.innerHTML = '<p>未在当前页面找到有效的商品价格。</p>';
+        return;
+      }
+
+      summaryDiv.innerHTML = `
+        <p>分析了 <strong>${totalCount}</strong> 个商品</p>
+        <p>平均价格: <strong>${averagePrice.toFixed(2)}</strong></p>
+      `;
+
+      renderBarChart(priceRanges);
     }
-    
-    // 显示产品信息
-    function showProductInfo(data) {
-        document.getElementById('productTitle').textContent = data.title || '未找到';
-        document.getElementById('productWeight').textContent = data.weight || '未找到';
-        document.getElementById('productDimensions').textContent = data.dimensions || '未找到';
-        document.getElementById('productAsin').textContent = data.asin || '未找到';
-        
-        productInfo.style.display = 'block';
-        openCalculatorBtn.style.display = 'block';
+  });
+
+  function renderBarChart(priceRanges) {
+    const colors = ['#34d399', '#60a5fa', '#fbbf24', '#f87171', '#c084fc', '#9ca3af'];
+    let colorIndex = 0;
+
+    const maxCount = Math.max(...Object.values(priceRanges).map(r => r.count));
+    if (maxCount === 0) return;
+
+    for (const range in priceRanges) {
+        const { count, percentage } = priceRanges[range];
+        const barWidth = (count / maxCount) * 100;
+        const color = colors[colorIndex % colors.length];
+
+        const row = document.createElement('div');
+        row.className = 'chart-row';
+        row.innerHTML = `
+            <div class="chart-label">${range}</div>
+            <div class="chart-bar-container">
+                <div class="chart-bar" style="width: ${barWidth}%; background-color: ${color};"></div>
+            </div>
+            <div class="chart-value">${count}个 (${percentage.toFixed(1)}%)</div>
+        `;
+        chartContainer.appendChild(row);
+        colorIndex++;
     }
-    
-    // 提取产品信息
-    extractBtn.addEventListener('click', async function() {
-        extractBtn.disabled = true;
-        extractBtn.textContent = '提取中...';
-        showStatus('正在提取产品信息...', 'info');
-        
-        try {
-            // 获取当前活动标签页
-            const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-            
-            // 检查是否在Amazon页面
-            if (!tab.url.includes('amazon.com')) {
-                throw new Error('请在Amazon.com产品页面使用此扩展');
-            }
-            
-            // 发送消息到内容脚本
-            const response = await chrome.tabs.sendMessage(tab.id, { action: 'extractProduct' });
-            
-            if (response.success) {
-                showStatus(response.message, 'success');
-                showProductInfo(response.data);
-                
-                // 存储数据供计算器使用
-                await chrome.storage.local.set({ 
-                    amazonProductData: response.data,
-                    extractTime: Date.now()
-                });
-                
-                // 同时存储到localStorage供网页访问
-                localStorage.setItem('amazonProductData', JSON.stringify(response.data));
-                localStorage.setItem('amazonExtensionInstalled', 'true');
-                
-            } else {
-                throw new Error(response.message);
-            }
-            
-        } catch (error) {
-            console.error('提取失败:', error);
-            showStatus(error.message || '提取失败，请重试', 'error');
-        } finally {
-            extractBtn.disabled = false;
-            extractBtn.textContent = '提取产品信息';
-        }
-    });
-    
-    // 打开计算器
-    openCalculatorBtn.addEventListener('click', async function() {
-        try {
-            // 获取存储的产品数据
-            const result = await chrome.storage.local.get(['amazonProductData']);
-            
-            if (result.amazonProductData) {
-                // 将数据存储到localStorage供网页访问
-                localStorage.setItem('amazonProductData', JSON.stringify(result.amazonProductData));
-            }
-            
-            // 直接跳转到amzailisting.com的利润计算器页面
-            const calculatorUrl = 'https://amzailisting.com/amazon_profit_calculator.html';
-            chrome.tabs.create({ url: calculatorUrl });
-            window.close();
-        } catch (error) {
-            console.error('打开计算器失败:', error);
-            showStatus('打开计算器失败', 'error');
-        }
-    });
-    
-    // 检查是否有之前提取的数据
-    chrome.storage.local.get(['amazonProductData', 'extractTime'], function(result) {
-        if (result.amazonProductData && result.extractTime) {
-            // 如果数据是最近5分钟内的，显示它
-            const fiveMinutesAgo = Date.now() - (5 * 60 * 1000);
-            if (result.extractTime > fiveMinutesAgo) {
-                showProductInfo(result.amazonProductData);
-                showStatus('显示最近提取的产品信息', 'info');
-            }
-        }
-    });
+  }
 });
