@@ -99,8 +99,13 @@
       align-items: flex-start;
       gap: 32px;
       padding: 32px 8px 24px 8px;
+<<<<<<< HEAD
       /* 修改 max-width 以容纳新的一列 */
       max-width: 1600px;
+=======
+      min-height: 60vh;
+      max-width: 1200px;
+>>>>>>> 0c4e02ada631a057b412cece5d495df835325e4b
       margin: 0 auto;
     }
     .column {
@@ -112,10 +117,15 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.05);
       padding: 32px 24px;
       min-width: 320px;
+<<<<<<< HEAD
       /* 调整最大宽度 */
       max-width: 500px;
     }
 
+=======
+      max-width: 540px;
+    }
+>>>>>>> 0c4e02ada631a057b412cece5d495df835325e4b
     h2 {
       color: var(--primary-color);
       margin-bottom: 16px;
@@ -196,7 +206,11 @@
       border-color: var(--primary-color);
       background-color: var(--bg-white);
     }
+<<<<<<< HEAD
     @media (max-width: 1200px) { /* 调整断点以适应三列布局 */
+=======
+    @media (max-width: 900px) {
+>>>>>>> 0c4e02ada631a057b412cece5d495df835325e4b
       main {
         flex-direction: column;
         gap: 20px;
@@ -206,9 +220,12 @@
         max-width: 100vw;
         min-width: 0;
       }
+<<<<<<< HEAD
       .history-column {
         max-height: 400px; /* 在较小屏幕上调整高度 */
       }
+=======
+>>>>>>> 0c4e02ada631a057b412cece5d495df835325e4b
     }
     @media (max-width: 600px) {
       header h1 {
@@ -336,7 +353,10 @@
     <a href="index.html" class="nav-btn active">Listing生成器</a>
     <a href="zhuangxiang.html" class="nav-btn">装箱计算器</a>
     <a href="amazon_profit_calculator.html" class="nav-btn">利润计算器</a>
+<<<<<<< HEAD
     <a href="history.html" class="nav-btn">历史记录</a>
+=======
+>>>>>>> 0c4e02ada631a057b412cece5d495df835325e4b
     <a href="extension-download.html" class="nav-btn">下载扩展</a>
   </nav>
   <main>
@@ -363,14 +383,21 @@
           </select>
         </div>
       </div>
+<<<<<<< HEAD
       <!-- 移除 onclick 属性，将通过 JS 添加事件监听 -->
       <button id="generate-btn" style="align-self: center;">立即生成</button>
+=======
+      <button id="generate-btn" onclick="generateListing()" style="align-self: center;">立即生成</button>
+>>>>>>> 0c4e02ada631a057b412cece5d495df835325e4b
     </div>
     <div class="column">
       <h2>生成结果</h2>
       <div id="result" class="result">请输入竞品标题或五点描述，并点击立即生成。</div>
     </div>
+<<<<<<< HEAD
 
+=======
+>>>>>>> 0c4e02ada631a057b412cece5d495df835325e4b
   </main>
   <section class="intro-section" style="max-width:1200px;margin:24px auto 40px auto;background:#fff;padding:16px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
     <h2>亚马逊Listing极速生成器简介</h2>
@@ -410,12 +437,16 @@
   </div>
   <button onclick="openDonate()" class="donate-button">💗 请我喝奶茶</button>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<<<<<<< HEAD
   
   <!-- 整合所有脚本逻辑到这一个模块脚本中 -->
+=======
+>>>>>>> 0c4e02ada631a057b412cece5d495df835325e4b
   <script type="module">
     // 导入 Supabase 客户端
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
+<<<<<<< HEAD
     // Supabase 配置
     const supabaseUrl = 'https://ctgsfnecogatpjgsjygx.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0Z3NmbmVjb2dhdHBqZ3NqeWd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwODk3ODYsImV4cCI6MjA3MTY2NTc4Nn0.xAUVO4DMjj-JievQ51SGxL1QMh3Zc1sATXPXEO_iPCw';
@@ -427,15 +458,29 @@
     const resultDiv = document.getElementById('result');
 
     let currentUser = null; // 用于存储当前用户信息
+=======
+    // !!! 重要: 请替换为你自己的 Supabase URL 和 Anon Key
+    const supabaseUrl = 'https://ctgsfnecogatpjgsjygx.supabase.co'; // 例如: 'https://xyz.supabase.co'
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0Z3NmbmVjb2dhdHBqZ3NqeWd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwODk3ODYsImV4cCI6MjA3MTY2NTc4Nn0.xAUVO4DMjj-JievQ51SGxL1QMh3Zc1sATXPXEO_iPCw'; // 例如: 'ey...'
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const userActions = document.getElementById('user-actions');
+>>>>>>> 0c4e02ada631a057b412cece5d495df835325e4b
 
     // 检查用户登录状态并更新UI
     async function checkUserSession() {
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
             // 用户已登录
+<<<<<<< HEAD
             currentUser = session.user;
             userActions.innerHTML = `
                 <span style="font-size: 14px; color: white;">欢迎, ${currentUser.email}</span>
+=======
+            const { user } = session;
+            userActions.innerHTML = `
+                <span style="font-size: 14px; color: white;">欢迎, ${user.email}</span>
+>>>>>>> 0c4e02ada631a057b412cece5d495df835325e4b
                 <a href="#" id="logout-btn" style="color: white; text-decoration: underline; font-size: 14px;">退出</a>
             `;
             
@@ -443,11 +488,16 @@
                 e.preventDefault();
                 const { error } = await supabase.auth.signOut();
                 if (!error) {
+<<<<<<< HEAD
                     window.location.reload();
+=======
+                    window.location.reload(); // 退出后刷新页面
+>>>>>>> 0c4e02ada631a057b412cece5d495df835325e4b
                 } else {
                     console.error('退出失败:', error);
                 }
             });
+<<<<<<< HEAD
 
         } else {
             // 用户未登录
@@ -548,3 +598,115 @@
 
 </body>
 </html>
+=======
+        }
+        // 如果未登录，则不执行任何操作，HTML 默认显示“登录/注册”按钮
+    }
+
+    // 页面加载时运行检查
+    document.addEventListener('DOMContentLoaded', checkUserSession);
+
+    // 保留您原有的函数
+    async function generateListing() {
+  const titles = document.getElementById("titles").value.trim();
+  const bullets = document.getElementById("bullets").value.trim();
+  const features = document.getElementById("features").value.trim();
+  const keywords = document.getElementById("keywords").value.trim();
+  const model = document.getElementById("model").value;
+
+  const btn = document.getElementById("generate-btn");
+  btn.disabled = true;
+  btn.textContent = "生成中...";
+
+  if (!titles && !bullets) {
+    document.getElementById("result").textContent = "请至少填写参考竞品标题或五点描述。";
+    btn.disabled = false;
+    btn.textContent = "立即生成";
+    return;
+  }
+
+  const prompt = `Based on the following reference Amazon titles and bullet points, generate a compelling, keyword-optimized product title and 5 persuasive bullet points.\n\nReference Titles:\n${titles}\n\nReference Bullets:\n${bullets}\n\nProduct Features:\n${features}\n\nTarget Keywords:\n${keywords}\n\nInstructions:\n- Output both in English and Chinese translation.\n- For each part, first give the English version, then provide the corresponding Chinese translation below it.\n- Title: concise, clear, max 200 characters\n- Bullet Points: focus on product benefits, features, and usability (5 points total)\n- Use professional, persuasive tone suitable for Amazon customers.\n- 中文翻译要准确、自然，适合亚马逊中国站或跨境卖家参考。`;
+
+  document.getElementById("result").textContent = "正在生成中，约需30秒...";
+
+  const res = await fetch("https://listing-ai.gskanchan.workers.dev", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ prompt, model }) // ← 加上 model 字段
+  });
+
+  const data = await res.json();
+  document.getElementById("result").innerHTML = marked.parse(data.choices?.[0]?.message?.content || "生成失败，请检查 API 返回内容");
+  btn.disabled = false;
+  btn.textContent = "立即生成";
+}
+
+  function openModal() {
+    document.getElementById("feedbackModal").style.display = "flex";
+  }
+  function closeModal() {
+    document.getElementById("feedbackModal").style.display = "none";
+  }
+
+function openDonate() {
+  document.getElementById("donateModal").style.display = "flex";
+}
+function closeDonate() {
+  document.getElementById("donateModal").style.display = "none";
+}
+
+    // 将您的其他脚本逻辑放在这里...
+  </script>
+  <script>
+    // 将函数放在全局作用域中，以便 onclick 可以调用
+    async function generateListing() {
+      const titles = document.getElementById("titles").value.trim();
+      const bullets = document.getElementById("bullets").value.trim();
+      const features = document.getElementById("features").value.trim();
+      const keywords = document.getElementById("keywords").value.trim();
+      const model = document.getElementById("model").value;
+
+      const btn = document.getElementById("generate-btn");
+      btn.disabled = true;
+      btn.textContent = "生成中...";
+
+      if (!titles && !bullets) {
+        document.getElementById("result").textContent = "请至少填写参考竞品标题或五点描述。";
+        btn.disabled = false;
+        btn.textContent = "立即生成";
+        return;
+      }
+
+      const prompt = `Based on the following reference Amazon titles and bullet points, generate a compelling, keyword-optimized product title and 5 persuasive bullet points.\n\nReference Titles:\n${titles}\n\nReference Bullets:\n${bullets}\n\nProduct Features:\n${features}\n\nTarget Keywords:\n${keywords}\n\nInstructions:\n- Output both in English and Chinese translation.\n- For each part, first give the English version, then provide the corresponding Chinese translation below it.\n- Title: concise, clear, max 200 characters\n- Bullet Points: focus on product benefits, features, and usability (5 points total)\n- Use professional, persuasive tone suitable for Amazon customers.\n- 中文翻译要准确、自然，适合亚马逊中国站或跨境卖家参考。`;
+
+      document.getElementById("result").textContent = "正在生成中，约需30秒...";
+
+      const res = await fetch("https://listing-ai.gskanchan.workers.dev", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt, model })
+      });
+
+      const data = await res.json();
+      document.getElementById("result").innerHTML = marked.parse(data.choices?.[0]?.message?.content || "生成失败，请检查 API 返回内容");
+      btn.disabled = false;
+      btn.textContent = "立即生成";
+    }
+
+    function openModal() {
+      document.getElementById("feedbackModal").style.display = "flex";
+    }
+    function closeModal() {
+      document.getElementById("feedbackModal").style.display = "none";
+    }
+
+    function openDonate() {
+      document.getElementById("donateModal").style.display = "flex";
+    }
+    function closeDonate() {
+      document.getElementById("donateModal").style.display = "none";
+    }
+  </script>
+</body>
+</html>
+>>>>>>> 0c4e02ada631a057b412cece5d495df835325e4b
