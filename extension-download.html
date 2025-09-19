@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>安装Chrome扩展 | 亚马逊Listing极速生成器</title>
+  <meta name="description" content="安装亚马逊产品数据提取Chrome扩展程序，轻松获取竞品信息。" />
+  <meta name="keywords" content="Chrome扩展, 亚马逊工具, 数据提取, 跨境电商工具, 安装教程" />
+  <style>
+    :root {
+      --primary-color: #007bff;
+      --bg-light: #f8f9fa;
+      --bg-white: #ffffff;
+      --text-main: #343a40;
+      --text-secondary: #6c757d;
+      --border-color: #dee2e6;
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-light);
+      color: var(--text-main);
+    }
+    header {
+      background-color: var(--primary-color);
+      color: white;
+      min-height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    header h1 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      padding: 0;
+    }
+    #user-actions {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    #user-actions .nav-btn {
+      margin: 0;
+      box-shadow: none;
+      background: transparent;
+      border: 1px solid white;
+      color: white;
+    }
+    #user-actions .nav-btn:hover {
+      background: rgba(255,255,255,0.2);
+      border-color: white;
+      color: white;
+    }
+    .nav-bar {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-top: 12px;
+      position: relative;
+      z-index: 2;
+    }
+    .nav-btn {
+      background: #fff;
+      color: var(--primary-color);
+      border: 2px solid var(--primary-color);
+      border-radius: 999px;
+      font-size: 18px;
+      font-weight: 500;
+      padding: 8px 32px;
+      margin: 0 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .nav-btn.active, .nav-btn:active {
+      background: var(--primary-color);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(0,122,255,0.10);
+      border-color: var(--primary-color);
+    }
+    .nav-btn:hover:not(.active) {
+      box-shadow: 0 6px 20px rgba(0,122,255,0.13);
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      background: rgba(0,122,255,0.1);
+    }
+    main {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 32px;
+      padding: 32px 8px 24px 8px;
+      min-height: 60vh;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .site-footer {
+      background-color: #343a40;
+      padding: 24px 16px;
+      text-align: center;
+      color: white;
+      font-size: 14px;
+      border-top: none;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+      margin-top: 40px;
+      border-radius: 12px 12px 0 0;
+      width: 100%;
+      position: static;
+    }
+    .site-footer a {
+      color: #ffffff;
+      text-decoration: underline;
+      font-weight: 500;
+      margin: 0 8px;
+    }
+    .site-footer a:hover {
+      text-decoration: none;
+      opacity: 0.9;
+    }
+    .install-guide-section {
+      background-color: var(--bg-white);
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      padding: 48px 32px;
+      width: 100%;
+      text-align: left;
+    }
+    .install-guide-section h2 {
+      text-align: center;
+      font-size: 28px;
+      color: var(--primary-color);
+    }
+    .install-guide-section > p {
+      text-align: center;
+      font-size: 18px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+    .steps-container {
+      margin-top: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .step-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      background-color: var(--bg-light);
+      padding: 24px;
+      border-radius: 12px;
+      border-left: 5px solid var(--primary-color);
+    }
+    .step-number {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: var(--primary-color);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    .step-content h3 {
+      margin: 0 0 8px 0;
+      color: var(--text-main);
+      font-size: 20px;
+    }
+    .step-content p {
+      margin: 0;
+      font-size: 16px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .step-content .download-button {
+      margin-top: 16px;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 8px;
+    }
+    .step-content .note {
+      margin-top: 12px;
+      font-size: 14px;
+      color: #888;
+    }
+    .success-card {
+      border-left-color: #28a745;
+    }
+    .success-card .step-number {
+      background-color: #28a745;
+    }
+    code {
+      background-color: #e9ecef;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "Courier New", Courier, monospace;
+      color: #c7254e;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>亚马逊Listing极速生成器</h1>
+    <div id="user-actions">
+      <a href="auth.html" class="nav-btn" id="auth-btn">登录/注册</a>
+    </div>
+  </header>
+  <nav class="nav-bar">
+    <a href="index.html" class="nav-btn">Listing生成器</a>
+    <a href="zhuangxiang.html" class="nav-btn">装箱计算器</a>
+    <a href="amazon_profit_calculator.html" class="nav-btn">利润计算器</a>
+    <a href="history.html" class="nav-btn">历史记录</a>
+    <a href="extension-download.html" class="nav-btn active">下载扩展</a>
+  </nav>
+  <main>
+    <div class="install-guide-section">
+      <h2>🚀 安装Chrome扩展程序</h2>
+      <p>只需简单几步，即可将我们的亚马逊数据提取工具添加到您的Chrome浏览器中。</p>
+      
+      <div class="steps-container">
+        
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h3>下载插件文件</h3>
+            <p>点击下方的按钮下载插件的 .zip 压缩文件。</p>
+            <a href="amazon-product-extractor.zip" class="download-button" download>📥 下载插件 (amazon-product-extractor.zip)</a>
+            <p class="note"><strong>注意:</strong> 下载完成后，请记住文件保存的位置，无需解压。</p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h3>打开Chrome扩展页面</h3>
+            <p>在Chrome浏览器的地址栏中输入 <code>chrome://extensions</code> 并按回车键。或者，您也可以通过菜单 -> 更多工具 -> 扩展程序 来访问。</p>
+          </div>
+        </div>
+        
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h3>启用开发者模式</h3>
+            <p>在扩展程序页面的右上角，找到并打开"开发者模式"的开关。</p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h3>解压并安装插件</h3>
+            <p>将下载的 <code>amazon-product-extractor.zip</code> 文件解压到一个文件夹中。</p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">5</div>
+          <div class="step-content">
+            <h3>加载扩展程序</h3>
+            <p>在Chrome扩展程序页面，点击左上角的"加载已解压的扩展程序"按钮，然后选择刚才解压出来的文件夹。</p>
+            <p class="note"><strong>注意:</strong> 请选择包含 <code>manifest.json</code> 文件的文件夹。</p>
+          </div>
+        </div>
+
+        <div class="step-card success-card">
+          <div class="step-number">✅</div>
+          <div class="step-content">
+            <h3>安装完成！</h3>
+            <p>您现在应该可以在Chrome工具栏中看到我们的插件图标了。点击它，开始高效地提取亚马逊产品数据吧！</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+  <footer class="site-footer">
+    <div class="footer-content">
+      <p>© 2025 亚马逊 Listing 极速生成器</p>
+      <p>
+        <a href="privacy-policy.html">隐私政策</a> |
+        <a href="terms-of-service.html">服务条款</a> |
+        <a href="about-us.html">关于我们</a> |
+        <a href="mailto:gskanchan@163.com">联系我们</a>
+      </p>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    const supabaseUrl = 'https://ctgsfnecogatpjgsjygx.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0Z3NmbmVjb2dhdHBqZ3NqeWd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwODk3ODYsImV4cCI6MjA3MTY2NTc4Nn0.xAUVO4DMjj-JievQ51SGxL1QMh3Zc1sATXPXEO_iPCw';
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const userActions = document.getElementById('user-actions');
+
+    async function checkUserSession() {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+            const { user } = session;
+            userActions.innerHTML = `
+                <span style="font-size: 14px; color: white;">欢迎, ${user.email}</span>
+                <a href="#" id="logout-btn" style="color: white; text-decoration: underline; font-size: 14px;">退出</a>
+            `;
+            
+            userActions.querySelector('#logout-btn').addEventListener('click', async (e) => {
+                e.preventDefault();
+                const { error } = await supabase.auth.signOut();
+                if (!error) {
+                    window.location.reload();
+                } else {
+                    console.error('退出失败:', error);
+                }
+            });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', checkUserSession);
+  </script>
+</body>
+</html>

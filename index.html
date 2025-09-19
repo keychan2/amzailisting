@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>亚马逊Listing极速生成器 | Amazon Listing Generator</title>
+  <meta name="description" content="免费在线工具，一键生成亚马逊产品标题和五点描述，支持关键词优化，适用于跨境卖家、Amazon运营。" />
+  <meta name="keywords" content="亚马逊Listing生成器, Amazon五点描述, 标题优化, Listing优化, 跨境电商工具" />
+  <style>
+    :root {
+      --primary-color: #007bff;
+      --bg-light: #f8f9fa;
+      --bg-white: #ffffff;
+      --text-main: #343a40;
+      --text-secondary: #6c757d;
+      --border-color: #dee2e6;
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-light);
+      color: var(--text-main);
+    }
+    header {
+      background-color: var(--primary-color);
+      color: white;
+      min-height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    header h1 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      padding: 0;
+    }
+    #user-actions {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    #user-actions .nav-btn {
+      margin: 0;
+      box-shadow: none;
+      background: transparent;
+      border: 1px solid white;
+      color: white;
+    }
+    #user-actions .nav-btn:hover {
+      background: rgba(255,255,255,0.2);
+      border-color: white;
+      color: white;
+    }
+    .nav-bar {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-top: 12px;
+      position: relative;
+      z-index: 2;
+    }
+    .nav-btn {
+      background: #fff;
+      color: var(--primary-color);
+      border: 2px solid var(--primary-color);
+      border-radius: 999px;
+      font-size: 18px;
+      font-weight: 500;
+      padding: 8px 32px;
+      margin: 0 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .nav-btn.active, .nav-btn:active {
+      background: var(--primary-color);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(0,122,255,0.10);
+      border-color: var(--primary-color);
+    }
+    .nav-btn:hover:not(.active) {
+      box-shadow: 0 6px 20px rgba(0,122,255,0.13);
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      background: rgba(0,122,255,0.1);
+    }
+    main {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 32px;
+      padding: 32px 8px 24px 8px;
+      /* 修改 max-width 以容纳新的一列 */
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+    .column {
+      flex: 1 1 0;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg-white);
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      padding: 32px 24px;
+      min-width: 320px;
+      /* 调整最大宽度 */
+      max-width: 500px;
+    }
+
+    h2 {
+      color: var(--primary-color);
+      margin-bottom: 16px;
+      font-size: 20px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+    }
+    label {
+      font-weight: 600;
+      margin-bottom: 5px;
+      display: block;
+    }
+    textarea, input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      font-size: 16px;
+      background-color: var(--bg-light);
+      color: var(--text-main);
+      box-sizing: border-box;
+      min-height: 40px;
+    }
+    textarea:focus, input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      background-color: var(--bg-white);
+    }
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      align-self: flex-start;
+      margin-top: 24px;
+    }
+    button:hover {
+      background-color: #005fcc;
+    }
+    .result {
+      white-space: pre-wrap;
+      background-color: var(--bg-white);
+      padding: 20px;
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      flex: 1;
+      min-height: 200px;
+    }
+    .custom-select-wrapper {
+      position: relative;
+    }
+    .custom-select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-color: var(--bg-light);
+      border: 1px solid var(--border-color);
+      padding: 12px;
+      font-size: 16px;
+      color: var(--text-main);
+      border-radius: 12px;
+      width: 100%;
+      box-sizing: border-box;
+      background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 8L10 12L14 8' stroke='%23636366' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 16px;
+      transition: border-color 0.3s ease;
+    }
+    .custom-select:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      background-color: var(--bg-white);
+    }
+    @media (max-width: 1200px) { /* 调整断点以适应三列布局 */
+      main {
+        flex-direction: column;
+        gap: 20px;
+        max-width: 98vw;
+      }
+      .column {
+        max-width: 100vw;
+        min-width: 0;
+      }
+      .history-column {
+        max-height: 400px; /* 在较小屏幕上调整高度 */
+      }
+    }
+    @media (max-width: 600px) {
+      header h1 {
+        font-size: 22px;
+        padding: 18px 0 0 0;
+      }
+      .nav-btn {
+        font-size: 15px;
+        padding: 7px 16px;
+      }
+      .nav-bar {
+        gap: 10px;
+      }
+      main {
+        padding: 8px 2px 12px 2px;
+      }
+      .column {
+        padding: 12px 4px;
+      }
+    }
+    .site-footer {
+      background-color: #343a40;
+      padding: 24px 16px;
+      text-align: center;
+      color: white;
+      font-size: 14px;
+      border-top: none;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+      margin-top: 40px;
+      border-radius: 12px 12px 0 0;
+      width: 100%;
+      position: static;
+    }
+    .site-footer a {
+      color: #ffffff;
+      text-decoration: underline;
+      font-weight: 500;
+      margin: 0 8px;
+    }
+    .site-footer a:hover {
+      text-decoration: none;
+      opacity: 0.9;
+    }
+    .donate-button {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      background-color: #fd7e14;
+      color: white;
+      border: none;
+      padding: 12px 16px;
+      border-radius: 999px;
+      font-size: 14px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 1000;
+    }
+    button:disabled, .nav-btn:disabled {
+      background-color: #b0b0b0 !important;
+      color: #f5f5f5 !important;
+      border-color: #b0b0b0 !important;
+      cursor: not-allowed !important;
+      box-shadow: none !important;
+      opacity: 0.7;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.4);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 16px;
+      text-align: center;
+      max-width: 800px;
+      width: 90%;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      position: relative;
+    }
+    .close-button {
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      font-size: 20px;
+      cursor: pointer;
+    }
+    .intro-section p,
+    .intro-section ul,
+    .intro-section li {
+      padding-left: 16px;
+      padding-right: 16px;
+      box-sizing: border-box;
+    }
+    .intro-section h2,
+    .intro-section h3 {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+    .intro-section h2 {
+      margin-top: 0;
+    }
+    main .column h2 {
+      margin-top: 0;
+    }
+    .intro-section ul {
+      list-style: none;
+      padding-left: 0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>亚马逊Listing极速生成器</h1>
+    <div id="user-actions">
+      <a href="auth.html" class="nav-btn" id="auth-btn">登录/注册</a>
+    </div>
+  </header>
+  <nav class="nav-bar">
+    <a href="index.html" class="nav-btn active">Listing生成器</a>
+    <a href="zhuangxiang.html" class="nav-btn">装箱计算器</a>
+    <a href="amazon_profit_calculator.html" class="nav-btn">利润计算器</a>
+    <a href="history.html" class="nav-btn">历史记录</a>
+    <a href="extension-download.html" class="nav-btn">下载扩展</a>
+  </nav>
+  <main>
+    <div class="column">
+      <h2>输入内容</h2>
+      <div class="input-group">
+        <label for="titles">参考竞品标题（建议不同标题进行换行）</label>
+        <textarea id="titles" rows="5" placeholder="请输入竞品标题，数量不限"></textarea>
+      </div>
+      <div class="input-group">
+        <label for="bullets">参考竞品五点描述（建议每点描述进行换行）</label>
+        <textarea id="bullets" rows="5" placeholder="请输入竞品描述，数量不限"></textarea>
+      </div>
+      <label for="features">产品特性（选填）</label>
+      <textarea id="features" rows="3" placeholder="如材质、特性、尺寸大小等"></textarea>
+      <label for="keywords">关键词（选填）</label>
+      <input type="text" id="keywords" placeholder="以英文逗号分隔，例如 iPhone case, iPhone, ceramic" />
+      <div class="input-group">
+        <label for="model">选择模型</label>
+        <div class="custom-select-wrapper">
+          <select id="model" class="custom-select">
+            <option value="deepseek">DeepSeek</option>
+            <option value="chatgpt">ChatGPT</option>
+          </select>
+        </div>
+      </div>
+      <!-- 移除 onclick 属性，将通过 JS 添加事件监听 -->
+      <button id="generate-btn" style="align-self: center;">立即生成</button>
+    </div>
+    <div class="column">
+      <h2>生成结果</h2>
+      <div id="result" class="result">请输入竞品标题或五点描述，并点击立即生成。</div>
+    </div>
+
+  </main>
+  <section class="intro-section" style="max-width:1200px;margin:24px auto 40px auto;background:#fff;padding:16px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+    <h2>亚马逊Listing极速生成器简介</h2>
+    <p>本工具专为亚马逊卖家和跨境电商运营设计，支持一键生成高转化的产品标题和五点描述，助力Listing优化，提升曝光和转化率。输入竞品信息，智能生成中英文内容，适用于各类品类。</p>
+    <h3>常见问题</h3>
+    <ul>
+      <li><b>Q: 这个工具适合哪些人？</b><br>适合所有亚马逊卖家、运营、跨境电商从业者。</li>
+      <li><b>Q: 支持哪些语言？</b><br>目前支持英文生成及中文翻译。</li>
+    </ul>
+  </section>
+  <footer class="site-footer">
+    <div class="footer-content">
+      <p>© 2025 亚马逊 Listing 极速生成器</p>
+      <p>
+        <a href="privacy-policy.html">隐私政策</a> |
+        <a href="terms-of-service.html">服务条款</a> |
+        <a href="about-us.html">关于我们</a> |
+        <a href="mailto:gskanchan@163.com">联系我们</a> |
+        <a href="javascript:void(0);" onclick="openModal()">提交反馈</a>
+      </p>
+    </div>
+  </footer>
+  <div id="feedbackModal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" onclick="closeModal()">×</span>
+      <iframe src="https://uqi0gjbiwfl.feishu.cn/share/base/form/shrcn0RZevoq7QLVvGN6U5gojqb"
+              frameborder="0" width="100%" height="700" style="border-radius: 12px;"></iframe>
+    </div>
+  </div>
+  <div id="donateModal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" onclick="closeDonate()">×</span>
+      <h3>☕ 请我喝杯奶茶吧！</h3>
+      <img src="donate.png" alt="打赏二维码" style="max-width: 300px; width: 100%; border-radius: 10px;"/>
+      <p style="margin-top: 10px;">长按或扫码支付，感谢你的支持！🥰</p>
+    </div>
+  </div>
+  <button onclick="openDonate()" class="donate-button">💗 请我喝奶茶</button>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  
+  <!-- 整合所有脚本逻辑到这一个模块脚本中 -->
+  <script type="module">
+    // 导入 Supabase 客户端
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    // Supabase 配置
+    const supabaseUrl = 'https://ctgsfnecogatpjgsjygx.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0Z3NmbmVjb2dhdHBqZ3NqeWd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwODk3ODYsImV4cCI6MjA3MTY2NTc4Nn0.xAUVO4DMjj-JievQ51SGxL1QMh3Zc1sATXPXEO_iPCw';
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // DOM 元素引用
+    const userActions = document.getElementById('user-actions');
+    const generateBtn = document.getElementById('generate-btn');
+    const resultDiv = document.getElementById('result');
+
+    let currentUser = null; // 用于存储当前用户信息
+
+    // 检查用户登录状态并更新UI
+    async function checkUserSession() {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+            // 用户已登录
+            currentUser = session.user;
+            userActions.innerHTML = `
+                <span style="font-size: 14px; color: white;">欢迎, ${currentUser.email}</span>
+                <a href="#" id="logout-btn" style="color: white; text-decoration: underline; font-size: 14px;">退出</a>
+            `;
+            
+            userActions.querySelector('#logout-btn').addEventListener('click', async (e) => {
+                e.preventDefault();
+                const { error } = await supabase.auth.signOut();
+                if (!error) {
+                    window.location.reload();
+                } else {
+                    console.error('退出失败:', error);
+                }
+            });
+
+        } else {
+            // 用户未登录
+            currentUser = null;
+        }
+    }
+
+    // 核心功能：生成 Listing
+    async function generateListing() {
+        const titles = document.getElementById("titles").value.trim();
+        const bullets = document.getElementById("bullets").value.trim();
+        const features = document.getElementById("features").value.trim();
+        const keywords = document.getElementById("keywords").value.trim();
+        const model = document.getElementById("model").value;
+
+        generateBtn.disabled = true;
+        generateBtn.textContent = "生成中...";
+
+        if (!titles && !bullets) {
+            resultDiv.textContent = "请至少填写参考竞品标题或五点描述。";
+            generateBtn.disabled = false;
+            generateBtn.textContent = "立即生成";
+            return;
+        }
+
+        const prompt = `Based on the following reference Amazon titles and bullet points, generate a compelling, keyword-optimized product title and 5 persuasive bullet points.\n\nReference Titles:\n${titles}\n\nReference Bullets:\n${bullets}\n\nProduct Features:\n${features}\n\nTarget Keywords:\n${keywords}\n\nInstructions:\n- Output both in English and Chinese translation.\n- For each part, first give the English version, then provide the corresponding Chinese translation below it.\n- Title: concise, clear, max 200 characters\n- Bullet Points: focus on product benefits, features, and usability (5 points total)\n- Use professional, persuasive tone suitable for Amazon customers.\n- 中文翻译要准确、自然，适合亚马逊中国站或跨境卖家参考。`;
+
+        resultDiv.textContent = "正在生成中，约需30秒...";
+
+        try {
+            const res = await fetch("https://listing-ai.gskanchan.workers.dev", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prompt, model })
+            });
+
+            if (!res.ok) {
+                throw new Error(`API 请求失败，状态码: ${res.status}`);
+            }
+
+            const data = await res.json();
+            const generatedContent = data.choices?.[0]?.message?.content || "生成失败，请检查 API 返回内容";
+            
+            resultDiv.innerHTML = marked.parse(generatedContent);
+
+            // 新增：如果用户已登录，则保存记录到 Supabase
+            if (currentUser && generatedContent) {
+                const { error: insertError } = await supabase
+                    .from('records')
+                    .insert([{ 
+                        user_id: currentUser.id, 
+                        prompt: prompt, // 保存原始 prompt
+                        content: generatedContent // 保存生成的完整内容
+                    }]);
+
+                if (insertError) {
+                    console.error('保存记录失败:', insertError);
+                }
+            }
+
+        } catch (error) {
+            console.error('生成过程中发生错误:', error);
+            resultDiv.textContent = `生成失败: ${error.message}`;
+        } finally {
+            generateBtn.disabled = false;
+            generateBtn.textContent = "立即生成";
+        }
+    }
+
+    // 弹窗相关函数
+    function openModal() {
+        document.getElementById("feedbackModal").style.display = "flex";
+    }
+    function closeModal() {
+        document.getElementById("feedbackModal").style.display = "none";
+    }
+    function openDonate() {
+        document.getElementById("donateModal").style.display = "flex";
+    }
+    function closeDonate() {
+        document.getElementById("donateModal").style.display = "none";
+    }
+    // 将弹窗函数暴露到全局，以便旧的 onclick 能继续工作
+    window.openModal = openModal;
+    window.closeModal = closeModal;
+    window.openDonate = openDonate;
+    window.closeDonate = closeDonate;
+
+    // 页面加载时运行的初始化逻辑
+    document.addEventListener('DOMContentLoaded', () => {
+        checkUserSession();
+        // 为生成按钮绑定事件
+        generateBtn.addEventListener('click', generateListing);
+    });
+  </script>
+  
+  <!-- 移除旧的、重复的脚本块 -->
+
+</body>
+</html>

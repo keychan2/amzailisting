@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>智能装箱计算器（组合优化 + 可分仓）</title>
+  <meta name="description" content="亚马逊智能装箱计算器，支持分仓和装箱优化，适合跨境卖家。" />
+  <style>
+    :root {
+      --primary-color: #007bff;
+      --bg-light: #f8f9fa;
+      --bg-white: #ffffff;
+      --text-main: #343a40;
+      --text-secondary: #6c757d;
+      --border-color: #dee2e6;
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-light);
+      color: var(--text-main);
+    }
+    header {
+      background-color: var(--primary-color);
+      color: white;
+      min-height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    header h1 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      padding: 0;
+    }
+    #user-actions {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    #user-actions .nav-btn {
+      margin: 0;
+      box-shadow: none;
+      background: transparent;
+      border: 1px solid white;
+      color: white;
+    }
+    #user-actions .nav-btn:hover {
+      background: rgba(255,255,255,0.2);
+      border-color: white;
+      color: white;
+    }
+    .nav-bar {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-top: 12px;
+      position: relative;
+      z-index: 2;
+    }
+    .nav-btn {
+      background: #fff;
+      color: var(--primary-color);
+      border: 2px solid var(--primary-color);
+      border-radius: 999px;
+      font-size: 18px;
+      font-weight: 500;
+      padding: 8px 32px;
+      margin: 0 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .nav-btn.active, .nav-btn:active {
+      background: var(--primary-color);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(0,122,255,0.10);
+      border-color: var(--primary-color);
+    }
+    .nav-btn:hover:not(.active) {
+      box-shadow: 0 6px 20px rgba(0,122,255,0.13);
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      background: rgba(0,122,255,0.1);
+    }
+    main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 8px 24px 8px;
+      min-height: 60vh;
+    }
+    .card {
+      background-color: var(--bg-white);
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      padding: 32px 24px;
+      max-width: 700px;
+      width: 100%;
+      margin-bottom: 32px;
+    }
+    h2, h3, h4 {
+      color: var(--primary-color);
+      margin-bottom: 16px;
+    }
+    label {
+      font-weight: 600;
+      margin-bottom: 5px;
+      display: block;
+    }
+    .row {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .row input {
+      flex: 1 1 150px;
+    }
+    input, button, select {
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      font-size: 16px;
+      background-color: var(--bg-light);
+      color: var(--text-main);
+      box-sizing: border-box;
+      margin-bottom: 10px;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      background-color: var(--bg-white);
+    }
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 12px 24px;
+      margin-top: 16px;
+      transition: background-color 0.3s;
+      align-self: flex-start;
+    }
+    button:hover {
+      background-color: #005fcc;
+    }
+    ul {
+      background: var(--bg-light);
+      padding: 1rem;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+    }
+    ul li {
+      margin-bottom: 0.25rem;
+    }
+    #result {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #eef2ff;
+      border-left: 4px solid var(--primary-color);
+      border-radius: 12px;
+    }
+    @media (max-width: 600px) {
+      .card {
+        padding: 16px 4px;
+      }
+      main {
+        padding: 4px;
+      }
+      header h1 {
+        font-size: 22px;
+        padding: 18px 0 0 0;
+      }
+      .nav-btn {
+        font-size: 15px;
+        padding: 7px 16px;
+      }
+      .nav-bar {
+        gap: 10px;
+      }
+    }
+    .site-footer {
+      background-color: #343a40;
+      padding: 24px 16px;
+      text-align: center;
+      color: white;
+      font-size: 14px;
+      border-top: none;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+      margin-top: 40px;
+      border-radius: 12px 12px 0 0;
+      width: 100%;
+      position: static;
+    }
+    .site-footer a {
+      color: #ffffff;
+      text-decoration: underline;
+      font-weight: 500;
+      margin: 0 8px;
+    }
+    .site-footer a:hover {
+      text-decoration: none;
+      opacity: 0.9;
+    }
+    .donate-button {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      background-color: #fd7e14;
+      color: white;
+      border: none;
+      padding: 12px 16px;
+      border-radius: 999px;
+      font-size: 14px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 1000;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.4);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 16px;
+      text-align: center;
+      max-width: 800px;
+      width: 90%;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      position: relative;
+    }
+    .close-button {
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      font-size: 20px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>智能装箱计算器</h1>
+    <div id="user-actions">
+        <a href="auth.html" class="nav-btn" id="auth-btn">登录/注册</a>
+    </div>
+  </header>
+  <nav class="nav-bar">
+    <a href="index.html" class="nav-btn">Listing生成器</a>
+    <a href="zhuangxiang.html" class="nav-btn active">装箱计算器</a>
+    <a href="amazon_profit_calculator.html" class="nav-btn">利润计算器</a>
+    <a href="history.html" class="nav-btn">历史记录</a>
+    <a href="extension-download.html" class="nav-btn">下载扩展</a>
+  </nav>
+  <main>
+    <div class="card">
+      <p>基于全组合优化算法，自动选择最佳装箱模板，支持亚马逊分仓规则。</p>
+      <label>📦 纸箱尺寸（cm）：</label>
+      <div class="row">
+        <input type="number" id="length" placeholder="长">
+        <input type="number" id="width" placeholder="宽">
+        <input type="number" id="height" placeholder="高">
+      </div>
+
+      <label>⚙️ 最大使用率（推荐不超过 80%）：</label>
+      <input type="number" id="maxUsage" value="80" min="50" max="100">%
+      
+      <label>🛒 添加商品 </label>
+      <div class="row">
+        <input type="text" id="itemName" placeholder="商品名称">
+        <input type="number" id="itemL" placeholder="长">
+        <input type="number" id="itemW" placeholder="宽">
+        <input type="number" id="itemH" placeholder="高">
+        <input type="number" id="itemWeight" placeholder="重量（kg）">
+        <input type="number" id="itemQty" placeholder="数量">
+      </div>
+      
+      <button id="add-item-btn">添加商品</button>
+      <ul id="itemList"></ul>
+      <button id="calculate-btn">📦 计算装箱方案</button>
+      <div id="result"></div>
+    </div>
+  </main>
+  <footer class="site-footer">
+    <div class="footer-content">
+      <p>© 2025 智能装箱计算器</p>
+      <p>
+        <a href="privacy-policy.html">隐私政策</a> |
+        <a href="terms-of-service.html">服务条款</a> |
+        <a href="about-us.html">关于我们</a> |
+        <a href="mailto:gskanchan@163.com">联系我们</a> |
+        <a href="javascript:void(0);" id="feedback-btn">提交反馈</a>
+      </p>
+    </div>
+  </footer>
+  <div id="feedbackModal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" data-target="feedbackModal">×</span>
+      <iframe src="https://uqi0gjbiwfl.feishu.cn/share/base/form/shrcn0RZevoq7QLVvGN6U5gojqb"
+              frameborder="0" width="100%" height="700" style="border-radius: 12px;"></iframe>
+    </div>
+  </div>
+  <div id="donateModal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" data-target="donateModal">×</span>
+      <h3>☕ 请我喝杯奶茶吧！</h3>
+      <img src="donate.png" alt="打赏二维码" style="max-width: 300px; width: 100%; border-radius: 10px;"/>
+      <p style="margin-top: 10px;">长按或扫码支付，感谢你的支持！🥰</p>
+    </div>
+  </div>
+  <button class="donate-button">💗 请我喝奶茶</button>
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    // --- Supabase Auth ---
+    const supabaseUrl = 'https://ctgsfnecogatpjgsjygx.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0Z3NmbmVjb2dhdHBqZ3NqeWd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwODk3ODYsImV4cCI6MjA3MTY2NTc4Nn0.xAUVO4DMjj-JievQ51SGxL1QMh3Zc1sATXPXEO_iPCw';
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const userActions = document.getElementById('user-actions');
+
+    async function checkUserSession() {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+            const { user } = session;
+            userActions.innerHTML = `
+                <span style="font-size: 14px; color: white;">欢迎, ${user.email}</span>
+                <a href="#" id="logout-btn" style="color: white; text-decoration: underline; font-size: 14px;">退出</a>
+            `;
+            
+            userActions.querySelector('#logout-btn').addEventListener('click', async (e) => {
+                e.preventDefault();
+                const { error } = await supabase.auth.signOut();
+                if (!error) {
+                    window.location.reload();
+                } else {
+                    console.error('退出失败:', error);
+                }
+            });
+        }
+    }
+
+    // --- App Logic ---
+    let rawItems = [];
+
+    function addItem() {
+      const name = document.getElementById('itemName').value.trim();
+      const l = +document.getElementById('itemL').value;
+      const w = +document.getElementById('itemW').value;
+      const h = +document.getElementById('itemH').value;
+      const weight = +document.getElementById('itemWeight').value;
+      const qty = +document.getElementById('itemQty').value;
+      if (!name || !l || !w || !h || !weight || !qty) return alert('请填写完整的商品信息');
+
+      rawItems.push({ name, volume: l * w * h, weight, quantity: qty });
+      const li = document.createElement('li');
+      li.textContent = `${name} - ${l}×${w}×${h} cm, ${weight}kg × ${qty}`;
+      document.getElementById('itemList').appendChild(li);
+
+      ['itemName','itemL','itemW','itemH','itemWeight','itemQty'].forEach(id => document.getElementById(id).value = '');
+    }
+
+    function generateTemplates(items, boxVolume, maxUsage) {
+      const combos = [];
+      const keys = items.map(x => x.name);
+
+      function dfs(depth, path) {
+        if (depth === items.length) {
+          let totalVol = 0, totalWeight = 0;
+          for (let i = 0; i < path.length; i++) {
+            totalVol += path[i] * items[i].volume;
+            totalWeight += path[i] * items[i].weight;
+          }
+          if (totalVol <= boxVolume * (maxUsage / 100) && totalVol > 0) {
+            combos.push({
+              combo: keys.reduce((acc, k, i) => { if (path[i]) acc[k] = path[i]; return acc; }, {}),
+              vol: totalVol,
+              weight: totalWeight
+            });
+          }
+          return;
+        }
+        const max = Math.min(10, Math.floor(boxVolume / items[depth].volume));
+        for (let i = 0; i <= max; i++) dfs(depth + 1, [...path, i]);
+      }
+
+      dfs(0, []);
+      combos.sort((a, b) => (b.vol / boxVolume + b.weight / b.vol) - (a.vol / boxVolume + a.weight / a.vol));
+      return combos;
+    }
+
+    function calculateBoxes() {
+      const L = +document.getElementById('length').value;
+      const W = +document.getElementById('width').value;
+      const H = +document.getElementById('height').value;
+      const maxUsage = +document.getElementById('maxUsage').value || 80;
+
+      const boxVol = L * W * H;
+      const boxVolWeight = boxVol / 6000;
+
+      const items = JSON.parse(JSON.stringify(rawItems));
+      const stock = {};
+      items.forEach(i => stock[i.name] = i.quantity);
+      const templates = generateTemplates(items, boxVol, maxUsage);
+      if (templates.length === 0) return alert("没有找到可用模板，请检查纸箱或商品数据");
+
+      const bestTemplate = templates[0];
+      const result = [];
+
+      while (true) {
+        let canPack = true;
+        for (let name in bestTemplate.combo) {
+          if (stock[name] < bestTemplate.combo[name]) {
+            canPack = false;
+            break;
+          }
+        }
+        if (!canPack) break;
+        result.push({ ...bestTemplate, label: '标准箱' });
+        for (let name in bestTemplate.combo) {
+          stock[name] -= bestTemplate.combo[name];
+        }
+      }
+
+      const remainder = [];
+      for (let name in stock) {
+        const item = items.find(i => i.name === name);
+        for (let i = 0; i < stock[name]; i++) {
+          remainder.push({ name, volume: item.volume, weight: item.weight });
+        }
+      }
+
+      while (remainder.length) {
+        let box = {}, vol = 0, weight = 0;
+        for (let i = remainder.length - 1; i >= 0; i--) {
+          const it = remainder[i];
+          if (vol + it.volume <= boxVol * (maxUsage / 100)) {
+            box[it.name] = (box[it.name] || 0) + 1;
+            vol += it.volume;
+            weight += it.weight;
+            remainder.splice(i, 1);
+          }
+        }
+        result.push({ combo: box, vol, weight, label: '尾箱' });
+      }
+
+      let html = `<h3>共使用 ${result.length} 箱</h3>`;
+      result.forEach((box, i) => {
+        const diff = (box.weight - boxVolWeight).toFixed(2);
+        html += `<h4>📦 箱 ${i + 1}（${box.label}）</h4><ul>`;
+        for (let name in box.combo) {
+          html += `<li>${name} × ${box.combo[name]}</li>`;
+        }
+        html += `</ul><p>实重：${box.weight.toFixed(2)}kg，体积重：${boxVolWeight.toFixed(2)}kg，使用率：${((box.vol / boxVol) * 100).toFixed(2)}%`;
+        if (box.weight < boxVolWeight) {
+          html += ` ⚠️ 差值 ${Math.abs(diff)}kg`;
+        }
+        html += `</p>`;
+      });
+      document.getElementById('result').innerHTML = html;
+    }
+
+    // --- Modal Logic ---
+    function openModal(id) {
+      document.getElementById(id).style.display = "flex";
+    }
+    function closeModal(id) {
+      document.getElementById(id).style.display = "none";
+    }
+
+    // --- Event Listeners ---
+    document.addEventListener('DOMContentLoaded', () => {
+      checkUserSession();
+
+      document.getElementById('add-item-btn').addEventListener('click', addItem);
+      document.getElementById('calculate-btn').addEventListener('click', calculateBoxes);
+      document.getElementById('feedback-btn').addEventListener('click', () => openModal('feedbackModal'));
+      document.querySelector('.donate-button').addEventListener('click', () => openModal('donateModal'));
+      
+      document.querySelectorAll('.close-button').forEach(button => {
+        button.addEventListener('click', (e) => {
+          const targetId = e.target.getAttribute('data-target');
+          if (targetId) {
+            closeModal(targetId);
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

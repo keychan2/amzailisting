@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amazon产品信息提取器</title>
+    <style>
+        body {
+            width: 320px;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .header h1 {
+            font-size: 18px;
+            color: #ff9900;
+            margin: 0 0 5px 0;
+        }
+        
+        .header p {
+            font-size: 12px;
+            color: #666;
+            margin: 0;
+        }
+        
+        .extract-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #ff9900;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 15px;
+            transition: background-color 0.3s;
+        }
+        
+        .extract-btn:hover {
+            background-color: #e68a00;
+        }
+        
+        .extract-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .product-info {
+            background-color: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            display: none;
+        }
+        
+        .product-info h3 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .product-info p {
+            margin: 4px 0;
+            color: #666;
+        }
+        
+        .bullet-points {
+            margin: 8px 0;
+            padding: 8px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+        
+        .bullet-points ul {
+            margin: 0;
+            padding-left: 16px;
+            font-size: 11px;
+            line-height: 1.3;
+        }
+        
+        .bullet-points li {
+            margin-bottom: 4px;
+        }
+        
+        .copy-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .copy-btn {
+            flex: 1;
+            padding: 8px 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .copy-btn:hover {
+            background-color: #0056b3;
+        }
+        
+        .copy-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .open-calculator {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .open-calculator:hover {
+            background-color: #218838;
+        }
+        
+        .instructions {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.4;
+            margin-top: 15px;
+        }
+        
+        .instructions ol {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>产品信息提取器 v2.0</h1>
+        <p>提取标题、五点描述、尺寸重量，支持单独复制</p>
+    </div>
+    
+    <button id="extractBtn" class="extract-btn">提取产品信息</button>
+    
+    <div id="status" class="status"></div>
+    
+    <div id="productInfo" class="product-info">
+        <h3>提取的产品信息：</h3>
+        <p><strong>产品名称：</strong><span id="productTitle">-</span></p>
+        <p><strong>重量：</strong><span id="productWeight">-</span></p>
+        <p><strong>尺寸：</strong><span id="productDimensions">-</span></p>
+        <p><strong>ASIN：</strong><span id="productAsin">-</span></p>
+        
+        <div id="bulletPointsSection" style="display: none;">
+            <p><strong>五点描述：</strong></p>
+            <div id="bulletPoints" class="bullet-points">
+                <ul id="bulletPointsList"></ul>
+            </div>
+        </div>
+        
+        <div class="copy-buttons">
+            <button id="copyTitleBtn" class="copy-btn">复制标题</button>
+            <button id="copyBulletBtn" class="copy-btn">复制五点描述</button>
+        </div>
+        
+        <div class="copy-buttons">
+            <button id="copyProductInfoBtn" class="copy-btn" style="background-color: #17a2b8;">复制产品信息</button>
+        </div>
+        
+        <div class="copy-buttons">
+            <button id="copyAllBtn" class="copy-btn" style="background-color: #28a745;">复制全部信息</button>
+        </div>
+    </div>
+    
+    <button id="openCalculator" class="open-calculator">打开利润计算器</button>
+    
+    <div class="instructions">
+        <strong>使用说明：</strong>
+        <ol>
+            <li>在Amazon产品页面点击"提取产品信息"</li>
+            <li>信息提取成功后点击"打开利润计算器"</li>
+            <li>产品信息将自动填充到计算器中</li>
+        </ol>
+    </div>
+    
+    <script src="popup.js"></script>
+</body>
+</html>
