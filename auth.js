@@ -6,7 +6,7 @@ async function initSupabaseClient() {
   if (supabaseClient) return supabaseClient;
   
   try {
-    // 从后端API获取配置
+    // 首先尝试从后端API获取配置
     const response = await fetch('/api/supabase-config');
     if (!response.ok) {
       throw new Error(`Failed to get config: ${response.status}`);
@@ -17,8 +17,22 @@ async function initSupabaseClient() {
     supabaseClient = createClient(config.supabaseUrl, config.supabaseAnonKey);
     return supabaseClient;
   } catch (error) {
-    console.error('Failed to initialize Supabase:', error);
-    throw new Error('无法连接到数据库服务');
+    console.error('API配置获取失败，尝试使用静态配置:', error);
+    
+    // 备用方案：使用静态配置
+    try {
+      if (window.SUPABASE_CONFIG) {
+        const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
+        supabaseClient = createClient(window.SUPABASE_CONFIG.supabaseUrl, window.SUPABASE_CONFIG.supabaseAnonKey);
+        console.log('使用静态配置成功初始化Supabase');
+        return supabaseClient;
+      } else {
+        throw new Error('静态配置未找到');
+      }
+    } catch (fallbackError) {
+      console.error('静态配置初始化也失败:', fallbackError);
+      throw new Error('无法连接到数据库服务');
+    }
   }
 }
 
