@@ -21,12 +21,15 @@ async function initSupabaseClient() {
     
     // 备用方案：使用静态配置
     try {
+      console.log('检查静态配置:', window.SUPABASE_CONFIG);
       if (window.SUPABASE_CONFIG) {
+        console.log('找到静态配置，开始初始化Supabase客户端');
         const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
         supabaseClient = createClient(window.SUPABASE_CONFIG.supabaseUrl, window.SUPABASE_CONFIG.supabaseAnonKey);
         console.log('使用静态配置成功初始化Supabase');
         return supabaseClient;
       } else {
+        console.error('window.SUPABASE_CONFIG 未定义');
         throw new Error('静态配置未找到');
       }
     } catch (fallbackError) {
