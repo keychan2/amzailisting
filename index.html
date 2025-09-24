@@ -672,13 +672,29 @@
   
   <!-- 整合所有脚本逻辑到这一个模块脚本中 -->
   <script type="module">
-    // 导入 Supabase 客户端
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
-    // Supabase 配置
-    const supabaseUrl = 'https://ctgsfnecogatpjgsjygx.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0Z3NmbmVjb2dhdHBqZ3NqeWd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwODk3ODYsImV4cCI6MjA3MTY2NTc4Nn0.xAUVO4DMjj-JievQ51SGxL1QMh3Zc1sATXPXEO_iPCw';
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    // 安全的Supabase客户端初始化
+    let supabase = null;
+    
+    // 初始化Supabase客户端
+    async function initSupabaseClient() {
+      if (supabase) return supabase;
+      
+      try {
+        // 从后端API获取配置
+        const response = await fetch('/api/supabase-config');
+        if (!response.ok) {
+          throw new Error(`Failed to get config: ${response.status}`);
+        }
+        
+        const config = await response.json();
+        const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
+        supabase = createClient(config.url, config.anonKey);
+        return supabase;
+      } catch (error) {
+        console.error('Failed to initialize Supabase:', error);
+        throw new Error('无法连接到数据库服务');
+      }
+    }
 
     // DOM 元素引用
     const userActions = document.getElementById('user-actions');
@@ -745,7 +761,9 @@
 
     // 检查用户登录状态并更新UI
     async function checkUserSession() {
-        const { data: { session } } = await supabase.auth.getSession();
+        try {
+            await initSupabaseClient();
+            const { data: { session } } = await supabase.auth.getSession();
         if (session) {
             // 用户已登录
             currentUser = session.user;
@@ -766,6 +784,10 @@
 
         } else {
             // 用户未登录
+            currentUser = null;
+        }
+        } catch (error) {
+            console.error('检查用户会话失败:', error);
             currentUser = null;
         }
     }
@@ -858,16 +880,21 @@
 
             // 新增：如果用户已登录，则保存记录到 Supabase
             if (currentUser && generatedContent) {
-                const { error: insertError } = await supabase
-                    .from('records')
-                    .insert([{ 
-                        user_id: currentUser.id, 
-                        prompt: prompt, // 保存原始 prompt
-                        content: generatedContent // 保存生成的完整内容
-                    }]);
+                try {
+                    await initSupabaseClient();
+                    const { error: insertError } = await supabase
+                        .from('records')
+                        .insert([{ 
+                            user_id: currentUser.id, 
+                            prompt: prompt, // 保存原始 prompt
+                            content: generatedContent // 保存生成的完整内容
+                        }]);
 
-                if (insertError) {
-                    console.error('保存记录失败:', insertError);
+                    if (insertError) {
+                        console.error('保存记录失败:', insertError);
+                    }
+                } catch (error) {
+                    console.error('初始化Supabase失败:', error);
                 }
             }
 
@@ -902,8 +929,13 @@
     window.updatePromptStrategy = updatePromptStrategy;
 
     // 页面加载时运行的初始化逻辑
-    document.addEventListener('DOMContentLoaded', () => {
-        checkUserSession();
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            await initSupabaseClient();
+            await checkUserSession();
+        } catch (error) {
+            console.error('初始化失败:', error);
+        }
         // 为生成按钮绑定事件
         generateBtn.addEventListener('click', generateListing);
     });

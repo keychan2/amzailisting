@@ -51,3 +51,24 @@ build/
 *.zip
 *.tar.gz
 *.rar
+
+# Security and sensitive files
+*.key
+*.pem
+*.p12
+*.pfx
+secrets.json
+config.json
+.secrets
+.credentials
+
+# API keys and tokens (additional protection)
+*api-key*
+*secret*
+*token*
+*credential*
+
+# Backup files
+*.bak
+*.backup
+*~

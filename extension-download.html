@@ -298,32 +298,53 @@
   </footer>
 
   <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+    // 安全的Supabase客户端初始化
+    let supabase = null;
 
-    const supabaseUrl = 'https://ctgsfnecogatpjgsjygx.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0Z3NmbmVjb2dhdHBqZ3NqeWd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwODk3ODYsImV4cCI6MjA3MTY2NTc4Nn0.xAUVO4DMjj-JievQ51SGxL1QMh3Zc1sATXPXEO_iPCw';
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    async function initSupabaseClient() {
+      if (supabase) return supabase;
+      
+      try {
+        const response = await fetch('/api/supabase-config');
+        if (!response.ok) {
+          throw new Error(`Failed to get config: ${response.status}`);
+        }
+        
+        const config = await response.json();
+        const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
+        supabase = createClient(config.url, config.anonKey);
+        return supabase;
+      } catch (error) {
+        console.error('Failed to initialize Supabase:', error);
+        throw new Error('无法连接到数据库服务');
+      }
+    }
 
     const userActions = document.getElementById('user-actions');
 
     async function checkUserSession() {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-            const { user } = session;
-            userActions.innerHTML = `
-                <span style="font-size: 14px; color: white;">欢迎, ${user.email}</span>
-                <a href="#" id="logout-btn" style="color: white; text-decoration: underline; font-size: 14px;">退出</a>
-            `;
-            
-            userActions.querySelector('#logout-btn').addEventListener('click', async (e) => {
-                e.preventDefault();
-                const { error } = await supabase.auth.signOut();
-                if (!error) {
-                    window.location.reload();
-                } else {
-                    console.error('退出失败:', error);
-                }
-            });
+        try {
+            await initSupabaseClient();
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                const { user } = session;
+                userActions.innerHTML = `
+                    <span style="font-size: 14px; color: white;">欢迎, ${user.email}</span>
+                    <a href="#" id="logout-btn" style="color: white; text-decoration: underline; font-size: 14px;">退出</a>
+                `;
+                
+                userActions.querySelector('#logout-btn').addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    const { error } = await supabase.auth.signOut();
+                    if (!error) {
+                        window.location.reload();
+                    } else {
+                        console.error('退出失败:', error);
+                    }
+                });
+            }
+        } catch (error) {
+            console.error('检查用户会话失败:', error);
         }
     }
 

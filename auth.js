@@ -1,10 +1,26 @@
-// Supabase 会通过 auth.html 中的 <script> 标签加载，并创建一个全局的 'supabase' 对象
-const { createClient } = supabase;
+// 安全的Supabase客户端初始化
+let supabaseClient = null;
 
-// Supabase 配置
-const supabaseUrl = 'https://ctgsfnecogatpjgsjygx.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0Z3NmbmVjb2dhdHBqZ3NqeWd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwODk3ODYsImV4cCI6MjA3MTY2NTc4Nn0.xAUVO4DMjj-JievQ51SGxL1QMh3Zc1sATXPXEO_iPCw';
-const supabaseClient = createClient(supabaseUrl, supabaseKey);
+// 初始化Supabase客户端
+async function initSupabaseClient() {
+  if (supabaseClient) return supabaseClient;
+  
+  try {
+    // 从后端API获取配置
+    const response = await fetch('/api/supabase-config');
+    if (!response.ok) {
+      throw new Error(`Failed to get config: ${response.status}`);
+    }
+    
+    const config = await response.json();
+    const { createClient } = supabase; // 使用全局supabase对象
+    supabaseClient = createClient(config.url, config.anonKey);
+    return supabaseClient;
+  } catch (error) {
+    console.error('Failed to initialize Supabase:', error);
+    throw new Error('无法连接到数据库服务');
+  }
+}
 
 // DOM 元素
 const formTitle = document.getElementById('form-title');
@@ -89,9 +105,12 @@ submitButton.addEventListener('click', async () => {
         return;
     }
 
-    if (isLoginMode) {
-        // --- 登录逻辑 ---
-        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    try {
+        await initSupabaseClient();
+        
+        if (isLoginMode) {
+            // --- 登录逻辑 ---
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
         if (error) {
             showMessage(error.message === 'Email not confirmed' ? '您的邮箱尚未验证，请检查收件箱完成验证。' : `登录失败: ${error.message}`);
         } else {
@@ -143,6 +162,10 @@ submitButton.addEventListener('click', async () => {
             submitButton.disabled = true;
             toggleModeLink.style.display = 'none';
         }
+    }
+    } catch (error) {
+        console.error('Supabase初始化或操作失败:', error);
+        showMessage('连接服务器失败，请稍后重试。');
     }
 });
 

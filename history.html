@@ -229,11 +229,27 @@
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+    // 安全的Supabase客户端初始化
+let supabase = null;
 
-    const supabaseUrl = 'https://ctgsfnecogatpjgsjygx.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0Z3NmbmVjb2dhdHBqZ3NqeWd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwODk3ODYsImV4cCI6MjA3MTY2NTc4Nn0.xAUVO4DMjj-JievQ51SGxL1QMh3Zc1sATXPXEO_iPCw';
-    const supabase = createClient(supabaseUrl, supabaseKey);
+async function initSupabaseClient() {
+  if (supabase) return supabase;
+  
+  try {
+    const response = await fetch('/api/supabase-config');
+    if (!response.ok) {
+      throw new Error(`Failed to get config: ${response.status}`);
+    }
+    
+    const config = await response.json();
+    const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
+    supabase = createClient(config.url, config.anonKey);
+    return supabase;
+  } catch (error) {
+    console.error('Failed to initialize Supabase:', error);
+    throw new Error('无法连接到数据库服务');
+  }
+}
 
     const userActions = document.getElementById('user-actions');
     const historyContainer = document.getElementById('history-list-container');
@@ -245,33 +261,39 @@
     let historyData = []; // 存储完整的历史记录数据
 
     async function checkUserSession() {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        currentUser = session.user;
-        userActions.innerHTML = `
-          <span style="font-size: 14px; color: white;">欢迎, ${currentUser.email}</span>
-          <a href="#" id="logout-btn" style="color: white; text-decoration: underline; font-size: 14px;">退出</a>
-        `;
-        
-        userActions.querySelector('#logout-btn').addEventListener('click', async (e) => {
-          e.preventDefault();
-          await supabase.auth.signOut();
-          window.location.reload();
-        });
+      try {
+        await initSupabaseClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          currentUser = session.user;
+          userActions.innerHTML = `
+            <span style="font-size: 14px; color: white;">欢迎, ${currentUser.email}</span>
+            <a href="#" id="logout-btn" style="color: white; text-decoration: underline; font-size: 14px;">退出</a>
+          `;
+          
+          userActions.querySelector('#logout-btn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            await supabase.auth.signOut();
+            window.location.reload();
+          });
 
-        await loadHistory();
-      } else {
-        currentUser = null;
+          await loadHistory();
+        } else {
+          currentUser = null;
+          displayLoginPrompt();
+        }
+      } catch (error) {
+        console.error('检查用户会话失败:', error);
         displayLoginPrompt();
       }
     }
 
     function displayLoginPrompt() {
-      historyContainer.innerHTML = \`
+      historyContainer.innerHTML = `
         <p style="text-align: center; font-size: 18px; color: var(--text-secondary);">
           请先 <a href="auth.html">登录</a> 以查看您的历史记录。
         </p>
-      \`;
+      `;
     }
 
     async function loadHistory() {
@@ -279,14 +301,21 @@
 
       historyContainer.innerHTML = '<p>正在加载历史记录...</p>';
 
-      const { data, error } = await supabase
-        .from('records')
-        .select('id, content, created_at')
-        .order('created_at', { ascending: false });
+      try {
+        await initSupabaseClient();
+        const { data, error } = await supabase
+          .from('records')
+          .select('id, content, created_at')
+          .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('加载历史记录失败:', error);
-        historyContainer.innerHTML = '<p>加载历史记录失败，请稍后重试。</p>';
+        if (error) {
+          console.error('加载历史记录失败:', error);
+          historyContainer.innerHTML = '<p>加载历史记录失败，请稍后重试。</p>';
+          return;
+        }
+      } catch (error) {
+        console.error('初始化数据库连接失败:', error);
+        historyContainer.innerHTML = '<p>连接数据库失败，请稍后重试。</p>';
         return;
       }
 
@@ -298,10 +327,10 @@
           const item = document.createElement('div');
           item.className = 'history-item';
           item.dataset.index = index; // 使用索引来查找数据
-          item.innerHTML = \`
-            <div class="history-item-date">\${new Date(record.created_at).toLocaleString()}</div>
-            <div class="history-item-preview">\${record.content.substring(0, 200)}...</div>
-          \`;
+          item.innerHTML = `
+            <div class="history-item-date">${new Date(record.created_at).toLocaleString()}</div>
+            <div class="history-item-preview">${record.content.substring(0, 200)}...</div>
+          `;
           item.addEventListener('click', () => openHistoryModal(index));
           historyContainer.appendChild(item);
         });
