@@ -33,8 +33,8 @@ export default function handler(req, res) {
 
     // 返回配置信息
     res.status(200).json({
-      url: supabaseUrl,
-      anonKey: supabaseAnonKey
+      supabaseUrl: supabaseUrl,
+      supabaseAnonKey: supabaseAnonKey
     });
 
   } catch (error) {
