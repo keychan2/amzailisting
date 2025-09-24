@@ -13,8 +13,8 @@ async function initSupabaseClient() {
     }
     
     const config = await response.json();
-    const { createClient } = supabase; // 使用全局supabase对象
-    supabaseClient = createClient(config.url, config.anonKey);
+    const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
+    supabaseClient = createClient(config.supabaseUrl, config.supabaseAnonKey);
     return supabaseClient;
   } catch (error) {
     console.error('Failed to initialize Supabase:', error);

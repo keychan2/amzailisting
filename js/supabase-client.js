@@ -23,7 +23,7 @@ async function initSupabase() {
     const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
     
     // 创建Supabase客户端
-    supabaseClient = createClient(config.url, config.anonKey);
+    supabaseClient = createClient(config.supabaseUrl, config.supabaseAnonKey);
     
     return supabaseClient;
     

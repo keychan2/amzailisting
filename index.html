@@ -688,7 +688,7 @@
         
         const config = await response.json();
         const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
-        supabase = createClient(config.url, config.anonKey);
+        supabase = createClient(config.supabaseUrl, config.supabaseAnonKey);
         return supabase;
       } catch (error) {
         console.error('Failed to initialize Supabase:', error);
