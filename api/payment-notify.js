@@ -1,5 +1,5 @@
-const crypto = require('crypto');
-const { createClient } = require('@supabase/supabase-js');
+import crypto from 'crypto';
+import { createClient } from '@supabase/supabase-js';
 
 // 解码Base64编码的秘钥信息
 function decodeSecretKey(encodedKey) {
@@ -31,7 +31,7 @@ function verifySign(params, secretKey) {
   return calculatedSign === sign;
 }
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   // 只接受POST请求
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });

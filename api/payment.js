@@ -1,4 +1,4 @@
-const crypto = require('crypto');
+import crypto from 'crypto';
 
 // 解码Base64编码的秘钥信息
 function decodeSecretKey(encodedKey) {
@@ -30,7 +30,7 @@ function verifySign(params, secretKey) {
   return calculatedSign === sign;
 }
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   // 设置CORS头
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
