@@ -1,8 +1,7 @@
-import http from 'http';
-import fs from 'fs';
-import path from 'path';
-import url from 'url';
-import dotenv from 'dotenv';
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
+const dotenv = require('dotenv');
 
 // Load environment variables
 dotenv.config();
