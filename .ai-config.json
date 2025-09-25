@@ -1,0 +1,30 @@
+{
+  "git": {
+    "path": "/opt/homebrew/bin/git",
+    "reason": "系统默认git存在xcrun错误，使用Homebrew安装的git可以正常工作",
+    "installation_date": "2025-01-25",
+    "verified": true
+  },
+  "development": {
+    "server": {
+      "command": "node dev-server.js",
+      "port": 8080,
+      "url": "http://localhost:8080"
+    }
+  },
+  "notes": {
+    "git_issue": "系统Xcode命令行工具存在问题，导致默认git无法使用",
+    "solution": "使用Homebrew安装的git: /opt/homebrew/bin/git",
+    "commands": {
+      "status": "/opt/homebrew/bin/git status",
+      "add": "/opt/homebrew/bin/git add .",
+      "commit": "/opt/homebrew/bin/git commit -m \"提交信息\"",
+      "push": "/opt/homebrew/bin/git push origin main"
+    }
+  },
+  "ai_instructions": {
+    "git_usage": "始终使用 /opt/homebrew/bin/git 而不是系统默认的 git 命令",
+    "verification": "在执行git操作前，确认使用正确的git路径",
+    "fallback": "如果Homebrew git不可用，检查 /usr/local/bin/git 或其他可能的安装位置"
+  }
+}
