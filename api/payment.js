@@ -30,30 +30,34 @@ function verifySign(params, secretKey) {
   return calculatedSign === sign;
 }
 
-export default async function handler(req, res) {
+export default async function handler(request) {
   // 设置CORS头
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Content-Type': 'application/json'
+  };
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+  if (request.method === 'OPTIONS') {
+    return new Response(null, { status: 200, headers });
   }
 
   try {
     const { MAPAY_MERCHANT_ID, MAPAY_SECRET_KEY, MAPAY_API_URL } = process.env;
     
     if (!MAPAY_MERCHANT_ID || !MAPAY_SECRET_KEY || !MAPAY_API_URL) {
-      return res.status(500).json({ 
+      return new Response(JSON.stringify({ 
         success: false, 
         message: '支付配置未完成' 
-      });
+      }), { status: 500, headers });
     }
 
     const secretKey = decodeSecretKey(MAPAY_SECRET_KEY);
 
-    if (req.method === 'POST') {
-      const { action, ...requestData } = req.body;
+    if (request.method === 'POST') {
+      const body = await request.json();
+      const { action, ...requestData } = body;
 
       if (action === 'create_order') {
         // 创建支付订单
@@ -68,10 +72,10 @@ export default async function handler(req, res) {
 
         // 验证必要参数
         if (!amount || !out_trade_no) {
-          return res.status(400).json({
+          return new Response(JSON.stringify({
             success: false,
             message: '缺少必要参数'
-          });
+          }), { status: 400, headers });
         }
 
         // 构建支付参数
@@ -79,8 +83,8 @@ export default async function handler(req, res) {
           pid: MAPAY_MERCHANT_ID,
           type: type,
           out_trade_no: out_trade_no,
-          notify_url: notify_url || `${req.headers.origin}/api/payment-notify`,
-          return_url: return_url || `${req.headers.origin}/payment-success.html`,
+          notify_url: notify_url || `${request.headers.get('origin')}/api/payment-notify`,
+          return_url: return_url || `${request.headers.get('origin')}/payment-success.html`,
           name: name,
           money: amount,
           sitename: 'AI商品描述生成器'
@@ -95,7 +99,7 @@ export default async function handler(req, res) {
         const urlParams = new URLSearchParams(paymentParams);
         const fullPaymentUrl = `${paymentUrl}?${urlParams.toString()}`;
 
-        return res.json({
+        return new Response(JSON.stringify({
           success: true,
           data: {
             payment_url: fullPaymentUrl,
@@ -103,17 +107,17 @@ export default async function handler(req, res) {
             amount: amount,
             type: type
           }
-        });
+        }), { status: 200, headers });
 
       } else if (action === 'query_order') {
         // 查询订单状态
         const { out_trade_no } = requestData;
 
         if (!out_trade_no) {
-          return res.status(400).json({
+          return new Response(JSON.stringify({
             success: false,
             message: '缺少订单号'
-          });
+          }), { status: 400, headers });
         }
 
         const queryParams = {
@@ -128,41 +132,41 @@ export default async function handler(req, res) {
         const queryResponse = await fetch(`${queryUrl}?${new URLSearchParams(queryParams)}`);
         const queryResult = await queryResponse.json();
 
-        return res.json({
+        return new Response(JSON.stringify({
           success: true,
           data: queryResult
-        });
+        }), { status: 200, headers });
 
       } else {
-        return res.status(400).json({
+        return new Response(JSON.stringify({
           success: false,
           message: '不支持的操作'
-        });
+        }), { status: 400, headers });
       }
 
-    } else if (req.method === 'GET') {
+    } else if (request.method === 'GET') {
       // 获取支付配置信息（仅返回非敏感信息）
-      return res.json({
+      return new Response(JSON.stringify({
         success: true,
         data: {
           merchant_id: MAPAY_MERCHANT_ID,
           api_url: MAPAY_API_URL,
           supported_types: ['alipay', 'wxpay']
         }
-      });
+      }), { status: 200, headers });
 
     } else {
-      return res.status(405).json({
+      return new Response(JSON.stringify({
         success: false,
         message: '不支持的请求方法'
-      });
+      }), { status: 405, headers });
     }
 
   } catch (error) {
     console.error('Payment API error:', error);
-    return res.status(500).json({
+    return new Response(JSON.stringify({
       success: false,
       message: '服务器内部错误'
-    });
+    }), { status: 500, headers });
   }
 }

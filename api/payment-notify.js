@@ -31,10 +31,13 @@ function verifySign(params, secretKey) {
   return calculatedSign === sign;
 }
 
-export default async function handler(req, res) {
+export default async function handler(request) {
   // 只接受POST请求
-  if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method not allowed' });
+  if (request.method !== 'POST') {
+    return new Response(JSON.stringify({ message: 'Method not allowed' }), { 
+      status: 405, 
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 
   try {
@@ -42,25 +45,31 @@ export default async function handler(req, res) {
     
     if (!MAPAY_SECRET_KEY || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
       console.error('Missing required environment variables');
-      return res.status(500).json({ message: 'Server configuration error' });
+      return new Response(JSON.stringify({ message: 'Server configuration error' }), { 
+        status: 500, 
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
     const secretKey = decodeSecretKey(MAPAY_SECRET_KEY);
     
     // 获取回调参数
-    const notifyData = req.body;
+    const notifyData = await request.json();
     console.log('Payment notify received:', notifyData);
 
     // 验证签名
     if (!verifySign(notifyData, secretKey)) {
       console.error('Invalid signature:', notifyData);
-      return res.status(400).json({ message: 'Invalid signature' });
+      return new Response(JSON.stringify({ message: 'Invalid signature' }), { 
+        status: 400, 
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
     // 检查支付状态
     if (notifyData.trade_status !== 'TRADE_SUCCESS') {
       console.log('Payment not successful:', notifyData.trade_status);
-      return res.status(200).send('success'); // 仍然返回成功，避免重复通知
+      return new Response('success', { status: 200 }); // 仍然返回成功，避免重复通知
     }
 
     // 初始化Supabase客户端
@@ -73,7 +82,10 @@ export default async function handler(req, res) {
     const orderParts = out_trade_no.split('_');
     if (orderParts.length < 4 || orderParts[0] !== 'premium') {
       console.error('Invalid order format:', out_trade_no);
-      return res.status(400).json({ message: 'Invalid order format' });
+      return new Response(JSON.stringify({ message: 'Invalid order format' }), { 
+        status: 400, 
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
     const subscriptionType = `${orderParts[0]}_${orderParts[1]}`; // premium_monthly
@@ -97,7 +109,7 @@ export default async function handler(req, res) {
 
     if (existingRecord) {
       console.log('Payment already processed:', trade_no);
-      return res.status(200).send('success');
+      return new Response('success', { status: 200 });
     }
 
     // 更新或插入用户订阅记录
@@ -121,7 +133,10 @@ export default async function handler(req, res) {
 
     if (upsertError) {
       console.error('Database error:', upsertError);
-      return res.status(500).json({ message: 'Database error' });
+      return new Response(JSON.stringify({ message: 'Database error' }), { 
+        status: 500, 
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
     console.log('Payment processed successfully:', {
@@ -132,10 +147,13 @@ export default async function handler(req, res) {
     });
 
     // 返回成功响应给码支付
-    return res.status(200).send('success');
+    return new Response('success', { status: 200 });
 
   } catch (error) {
     console.error('Payment notify error:', error);
-    return res.status(500).json({ message: 'Internal server error' });
+    return new Response(JSON.stringify({ message: 'Internal server error' }), { 
+      status: 500, 
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 }
