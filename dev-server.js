@@ -1,10 +1,11 @@
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
-const url = require('url');
+import http from 'http';
+import fs from 'fs';
+import path from 'path';
+import url from 'url';
+import dotenv from 'dotenv';
 
 // Load environment variables
-require('dotenv').config();
+dotenv.config();
 
 const server = http.createServer(async (req, res) => {
   const parsedUrl = url.parse(req.url, true);
