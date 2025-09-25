@@ -50,7 +50,10 @@ const server = http.createServer(async (req, res) => {
           const mockReq = {
             method: 'POST',
             body: JSON.parse(body),
-            ...JSON.parse(body)
+            headers: {
+              origin: `http://localhost:${PORT}`,
+              'content-type': 'application/json'
+            }
           };
           
           const mockRes = {
