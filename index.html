@@ -431,6 +431,233 @@
       box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
     }
 
+    /* 订阅状态样式 */
+    .subscription-status {
+      display: flex;
+      align-items: center;
+      margin-right: 10px;
+    }
+    
+    .free-badge, .premium-badge {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .free-badge {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+    
+    .premium-badge {
+      background: linear-gradient(45deg, #ffd700, #ffed4e);
+      color: #333;
+      border: 1px solid #ffd700;
+    }
+    
+    .expire-date {
+      font-size: 11px;
+      color: rgba(255,255,255,0.8);
+      margin-left: 8px;
+    }
+    
+    .usage-display {
+      font-size: 12px;
+      color: rgba(255,255,255,0.9);
+      margin-right: 15px;
+    }
+    
+    .upgrade-btn {
+      background: linear-gradient(45deg, #ff6b6b, #ee5a24) !important;
+      border-color: #ff6b6b !important;
+      color: white !important;
+      font-weight: 600;
+      animation: pulse 2s infinite;
+    }
+    
+    .upgrade-btn:hover {
+      background: linear-gradient(45deg, #ee5a24, #ff6b6b) !important;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(255,107,107,0.4) !important;
+    }
+    
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(255,107,107,0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(255,107,107,0); }
+      100% { box-shadow: 0 0 0 0 rgba(255,107,107,0); }
+    }
+    
+    /* 支付弹窗样式 */
+    .payment-modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .payment-modal-content {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      position: relative;
+      text-align: center;
+    }
+    
+    .payment-close {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      font-size: 24px;
+      cursor: pointer;
+      color: #999;
+    }
+    
+    .payment-close:hover {
+      color: #333;
+    }
+    
+    .plan-card {
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      padding: 24px;
+      margin: 16px 0;
+      background: #f8f9fa;
+      transition: all 0.3s ease;
+    }
+    
+    .plan-card.recommended {
+      border-color: var(--primary-color);
+      background: rgba(0,123,255,0.05);
+      position: relative;
+    }
+    
+    .plan-card.recommended::before {
+      content: "推荐";
+      position: absolute;
+      top: -10px;
+      right: 20px;
+      background: var(--primary-color);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .plan-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 8px;
+    }
+    
+    .plan-price {
+      font-size: 32px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 16px;
+    }
+    
+    .plan-price .currency {
+      font-size: 18px;
+      vertical-align: top;
+    }
+    
+    .plan-features {
+      list-style: none;
+      padding: 0;
+      margin: 16px 0;
+      text-align: left;
+    }
+    
+    .plan-features li {
+      padding: 6px 0;
+      color: #666;
+      position: relative;
+      padding-left: 20px;
+    }
+    
+    .plan-features li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #28a745;
+      font-weight: bold;
+    }
+    
+    .payment-methods {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin: 24px 0;
+    }
+    
+    .payment-method {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: white;
+    }
+    
+    .payment-method.selected {
+      border-color: var(--primary-color);
+      background: rgba(0,123,255,0.1);
+    }
+    
+    .payment-method img {
+      width: 40px;
+      height: 40px;
+      margin-bottom: 8px;
+    }
+    
+    .payment-method-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+    }
+    
+    .pay-button {
+      width: 100%;
+      background: linear-gradient(45deg, var(--primary-color), #0056b3);
+      color: white;
+      border: none;
+      padding: 16px 32px;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 16px;
+    }
+    
+    .pay-button:hover {
+      background: linear-gradient(45deg, #0056b3, var(--primary-color));
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,123,255,0.3);
+    }
+    
+    .pay-button:disabled {
+      background: #ccc !important;
+      cursor: not-allowed !important;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
     /* 响应式设计 */
     @media (max-width: 768px) {
       .form-row {
@@ -441,6 +668,24 @@
       .mode-selector {
         flex-direction: column;
       }
+      
+      #user-actions {
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-end;
+      }
+      
+      .subscription-status, .usage-display {
+        font-size: 11px;
+      }
+      
+      .payment-modal-content {
+        padding: 24px 16px;
+      }
+      
+      .payment-methods {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
@@ -448,6 +693,13 @@
   <header>
     <h1>亚马逊Listing极速生成器</h1>
     <div id="user-actions">
+      <div id="subscriptionStatus" class="subscription-status">
+        <span class="free-badge">免费用户</span>
+      </div>
+      <div id="usageDisplay" class="usage-display">
+        今日剩余次数：3
+      </div>
+      <button id="upgradeButton" class="nav-btn upgrade-btn">升级高级版</button>
       <a href="auth.html" class="nav-btn" id="auth-btn">登录/注册</a>
     </div>
   </header>
@@ -786,24 +1038,36 @@
         if (session) {
             // 用户已登录
             currentUser = session.user;
-            userActions.innerHTML = `
-                <span style="font-size: 14px; color: white;">欢迎, ${currentUser.email}</span>
-                <a href="#" id="logout-btn" style="color: white; text-decoration: underline; font-size: 14px;">退出</a>
-            `;
             
-            userActions.querySelector('#logout-btn').addEventListener('click', async (e) => {
-                e.preventDefault();
-                const { error } = await supabase.auth.signOut();
-                if (!error) {
-                    window.location.reload();
-                } else {
-                    console.error('退出失败:', error);
-                }
-            });
+            // 更新认证按钮为用户信息和退出按钮
+            const authBtn = document.getElementById('auth-btn');
+            if (authBtn) {
+                authBtn.innerHTML = `欢迎, ${currentUser.email}`;
+                authBtn.href = '#';
+                authBtn.onclick = async (e) => {
+                    e.preventDefault();
+                    const { error } = await supabase.auth.signOut();
+                    if (!error) {
+                        window.location.reload();
+                    } else {
+                        console.error('退出失败:', error);
+                    }
+                };
+                authBtn.title = '点击退出登录';
+            }
 
         } else {
             // 用户未登录
             currentUser = null;
+            
+            // 恢复登录按钮
+            const authBtn = document.getElementById('auth-btn');
+            if (authBtn) {
+                authBtn.innerHTML = '登录/注册';
+                authBtn.href = 'auth.html';
+                authBtn.onclick = null;
+                authBtn.title = '';
+            }
         }
         } catch (error) {
             console.error('检查用户会话失败:', error);
@@ -957,8 +1221,131 @@
         }
         // 为生成按钮绑定事件
         generateBtn.addEventListener('click', generateListing);
+        
+        // 初始化支付管理器
+        if (window.paymentManager) {
+            await window.paymentManager.init();
+        }
+        
+        // 绑定升级按钮事件
+        const upgradeButton = document.getElementById('upgradeButton');
+        if (upgradeButton) {
+            upgradeButton.addEventListener('click', () => {
+                showUpgradeModal();
+            });
+        }
     });
+
+    // 支付相关函数
+    function showUpgradeModal() {
+        document.getElementById('upgradeModal').style.display = 'flex';
+    }
+
+    function hideUpgradeModal() {
+        document.getElementById('upgradeModal').style.display = 'none';
+    }
+
+    function selectPaymentMethod(method) {
+        // 移除所有选中状态
+        document.querySelectorAll('.payment-method').forEach(el => {
+            el.classList.remove('selected');
+        });
+        // 添加选中状态
+        document.querySelector(`[data-method="${method}"]`).classList.add('selected');
+        
+        // 更新支付按钮
+        const payButton = document.querySelector('.pay-button');
+        payButton.dataset.method = method;
+    }
+
+    async function handlePayment() {
+        const payButton = document.querySelector('.pay-button');
+        const method = payButton.dataset.method || 'alipay';
+        
+        if (window.paymentManager) {
+            await window.paymentManager.handlePayment('monthly', method);
+        }
+    }
+
+    // 修改generateListing函数以包含使用限制检查
+    const originalGenerateListing = generateListing;
+    generateListing = async function() {
+        // 确保用户已登录
+        if (window.paymentManager) {
+            if (!window.paymentManager.ensureUserLoggedIn()) {
+                return; // 用户未登录，停止执行
+            }
+            
+            // 检查是否可以生成
+            if (!window.paymentManager.canGenerate()) {
+                showUpgradeModal();
+                return;
+            }
+            
+            // 执行原始生成逻辑
+            await originalGenerateListing();
+            
+            // 增加使用次数
+            await window.paymentManager.incrementUsage();
+        } else {
+            await originalGenerateListing();
+        }
+    };
+
+    // 暴露函数到全局
+    window.showUpgradeModal = showUpgradeModal;
+    window.hideUpgradeModal = hideUpgradeModal;
+    window.selectPaymentMethod = selectPaymentMethod;
+    window.handlePayment = handlePayment;
   </script>
+
+  <!-- 支付弹窗 -->
+  <div id="upgradeModal" class="payment-modal">
+    <div class="payment-modal-content">
+      <span class="payment-close" onclick="hideUpgradeModal()">&times;</span>
+      <h2 style="color: var(--primary-color); margin-bottom: 24px;">升级到高级版</h2>
+      
+      <div class="plan-card recommended">
+        <div class="plan-title">高级会员月卡</div>
+        <div class="plan-price">
+          <span class="currency">¥</span>18.88
+        </div>
+        <ul class="plan-features">
+          <li>无限次数生成Listing</li>
+          <li>高级AI模型优先使用</li>
+          <li>专业模板库访问</li>
+          <li>批量生成功能</li>
+          <li>优先客服支持</li>
+          <li>数据导出功能</li>
+        </ul>
+      </div>
+
+      <div style="margin: 24px 0;">
+        <h3 style="margin-bottom: 16px; color: #333;">选择支付方式</h3>
+        <div class="payment-methods">
+          <div class="payment-method selected" data-method="alipay" onclick="selectPaymentMethod('alipay')">
+            <div style="font-size: 32px; color: #1677ff;">💰</div>
+            <div class="payment-method-name">支付宝</div>
+          </div>
+          <div class="payment-method" data-method="wxpay" onclick="selectPaymentMethod('wxpay')">
+            <div style="font-size: 32px; color: #07c160;">💚</div>
+            <div class="payment-method-name">微信支付</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="pay-button" data-method="alipay" onclick="handlePayment()">
+        立即支付 ¥18.88
+      </button>
+      
+      <div style="margin-top: 16px; font-size: 12px; color: #999;">
+        支付后立即生效，支持7天无理由退款
+      </div>
+    </div>
+  </div>
+
+  <!-- 引入支付管理器 -->
+  <script src="js/payment-manager.js"></script>
   
   <!-- 移除旧的、重复的脚本块 -->
 
