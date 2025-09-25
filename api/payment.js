@@ -46,7 +46,19 @@ export default async function handler(request) {
   try {
     const { MAPAY_MERCHANT_ID, MAPAY_SECRET_KEY, MAPAY_API_URL } = process.env;
     
+    console.log('Payment API called with method:', request.method);
+    console.log('Environment variables check:', {
+      MAPAY_MERCHANT_ID: !!MAPAY_MERCHANT_ID,
+      MAPAY_SECRET_KEY: !!MAPAY_SECRET_KEY,
+      MAPAY_API_URL: !!MAPAY_API_URL
+    });
+    
     if (!MAPAY_MERCHANT_ID || !MAPAY_SECRET_KEY || !MAPAY_API_URL) {
+      console.error('Missing payment configuration:', {
+        MAPAY_MERCHANT_ID: !!MAPAY_MERCHANT_ID,
+        MAPAY_SECRET_KEY: !!MAPAY_SECRET_KEY,
+        MAPAY_API_URL: !!MAPAY_API_URL
+      });
       return new Response(JSON.stringify({ 
         success: false, 
         message: '支付配置未完成' 
@@ -58,6 +70,8 @@ export default async function handler(request) {
     if (request.method === 'POST') {
       const body = await request.json();
       const { action, ...requestData } = body;
+      
+      console.log('POST request received:', { action, requestData });
 
       if (action === 'create_order') {
         // 创建支付订单
@@ -72,11 +86,14 @@ export default async function handler(request) {
 
         // 验证必要参数
         if (!amount || !out_trade_no) {
+          console.error('Missing required parameters:', { amount, out_trade_no });
           return new Response(JSON.stringify({
             success: false,
             message: '缺少必要参数'
           }), { status: 400, headers });
         }
+        
+        console.log('Creating payment order:', { amount, type, out_trade_no, name });
 
         // 获取origin，处理本地开发环境
         let origin = request.headers.get('origin');
@@ -109,15 +126,22 @@ export default async function handler(request) {
         const paymentUrl = `${MAPAY_API_URL}/submit.php`;
         const urlParams = new URLSearchParams(paymentParams);
         const fullPaymentUrl = `${paymentUrl}?${urlParams.toString()}`;
+        
+        console.log('Payment URL constructed:', fullPaymentUrl);
+        console.log('Payment parameters:', paymentParams);
+
+        const responseData = {
+          payment_url: fullPaymentUrl,
+          order_id: out_trade_no,
+          amount: amount,
+          type: type
+        };
+        
+        console.log('Returning payment response:', responseData);
 
         return new Response(JSON.stringify({
           success: true,
-          data: {
-            payment_url: fullPaymentUrl,
-            order_id: out_trade_no,
-            amount: amount,
-            type: type
-          }
+          data: responseData
         }), { status: 200, headers });
 
       } else if (action === 'query_order') {

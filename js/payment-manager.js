@@ -192,6 +192,7 @@ class PaymentManager {
 
         try {
             console.log('Creating payment order with data:', orderData);
+            console.log('Sending request to:', '/api/payment');
             
             const response = await fetch('/api/payment', {
                 method: 'POST',
@@ -202,29 +203,49 @@ class PaymentManager {
             });
 
             console.log('Payment API response status:', response.status);
+            console.log('Payment API response headers:', Object.fromEntries(response.headers.entries()));
             
             if (!response.ok) {
                 const errorText = await response.text();
                 console.error('Payment API error response:', errorText);
-                throw new Error(`HTTP ${response.status}: ${errorText}`);
+                
+                // 尝试解析错误响应
+                let errorMessage = errorText;
+                try {
+                    const errorJson = JSON.parse(errorText);
+                    errorMessage = errorJson.message || errorText;
+                } catch (e) {
+                    // 如果不是JSON，使用原始文本
+                }
+                
+                throw new Error(`HTTP ${response.status}: ${errorMessage}`);
             }
 
             const result = await response.json();
             console.log('Payment API result:', result);
             
             if (result.success) {
+                console.log('Payment order created successfully:', result.data);
                 return result.data;
             } else {
+                console.error('Payment order creation failed:', result);
                 throw new Error(result.message || '创建订单失败');
             }
         } catch (error) {
             console.error('Failed to create payment order:', error);
+            console.error('Error details:', {
+                name: error.name,
+                message: error.message,
+                stack: error.stack
+            });
             
             // 提供更友好的错误信息
             if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
                 throw new Error('网络连接失败，请检查网络连接后重试');
             } else if (error.message.includes('HTTP 500')) {
                 throw new Error('服务器配置错误，请联系管理员');
+            } else if (error.message.includes('支付配置未完成')) {
+                throw new Error('支付配置未完成，请联系管理员');
             } else {
                 throw error;
             }
@@ -279,6 +300,7 @@ class PaymentManager {
     // 处理支付
     async handlePayment(planType, paymentMethod) {
         const payButton = document.querySelector('.pay-button');
+        const originalButtonText = payButton ? payButton.textContent : '立即支付';
         
         try {
             // 显示加载状态
@@ -301,6 +323,7 @@ class PaymentManager {
                 }
                 
                 // 跳转到支付页面
+                console.log('正在打开支付页面:', orderData.payment_url);
                 window.open(orderData.payment_url, '_blank');
                 
                 // 开始轮询订单状态
@@ -314,27 +337,52 @@ class PaymentManager {
                 }, 1000);
                 
             } else {
+                console.error('支付订单创建失败，返回数据:', orderData);
                 throw new Error('支付订单创建失败：未获取到支付链接');
             }
 
         } catch (error) {
             console.error('支付处理失败:', error);
+            console.error('错误详情:', {
+                name: error.name,
+                message: error.message,
+                stack: error.stack
+            });
             
             // 显示更友好的错误信息
             let errorMessage = '支付失败：' + error.message;
-            if (error.message.includes('网络连接失败')) {
+            if (error.message.includes('网络连接失败') || error.name === 'TypeError') {
                 errorMessage = '网络连接失败，请检查网络后重试';
-            } else if (error.message.includes('服务器配置错误')) {
+            } else if (error.message.includes('服务器配置错误') || error.message.includes('HTTP 500')) {
                 errorMessage = '服务暂时不可用，请稍后重试或联系客服';
+            } else if (error.message.includes('支付配置未完成')) {
+                errorMessage = '支付服务配置错误，请联系管理员';
+                console.error('Payment configuration error - check environment variables');
+            } else if (error.message.includes('HTTP 400')) {
+                errorMessage = '请求参数错误，请重试';
+            } else if (error.message.includes('HTTP 404')) {
+                errorMessage = '支付服务不可用，请联系管理员';
+            } else if (error.message.includes('没有找到可用支付账号')) {
+                errorMessage = '支付通道暂时不可用，请稍后重试或联系客服';
             }
             
             alert(errorMessage);
             
-        } finally {
-            // 恢复按钮状态（仅在出错时）
-            if (payButton && payButton.textContent !== '等待支付完成...') {
-                payButton.textContent = '立即支付';
+            // 恢复按钮状态
+            if (payButton) {
+                payButton.textContent = originalButtonText;
                 payButton.disabled = false;
+            }
+            
+        } finally {
+            // 确保在非等待支付状态下恢复按钮
+            if (payButton && payButton.textContent !== '等待支付完成...') {
+                setTimeout(() => {
+                    if (payButton && payButton.textContent !== '等待支付完成...') {
+                        payButton.textContent = originalButtonText;
+                        payButton.disabled = false;
+                    }
+                }, 100);
             }
         }
     }
