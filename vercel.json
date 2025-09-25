@@ -1,11 +1,6 @@
 {
   "version": 2,
   "name": "amazon-listing-generator",
-  "functions": {
-    "api/**/*.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
   "headers": [
     {
       "source": "/(.*)",
