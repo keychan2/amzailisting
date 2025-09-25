@@ -1,6 +1,7 @@
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
+import url from 'url';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 
@@ -10,6 +11,58 @@ const __dirname = path.dirname(__filename);
 
 // Load environment variables
 dotenv.config();
+
+// Helper function to adapt Web standard API functions to Node.js req/res
+async function callWebStandardAPI(apiPath, req, res) {
+  try {
+    // Import the API handler dynamically
+    const apiHandler = await import(apiPath);
+    
+    // Read request body
+    let body = '';
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      await new Promise((resolve) => {
+        req.on('data', chunk => {
+          body += chunk.toString();
+        });
+        req.on('end', resolve);
+      });
+    }
+    
+    // Create Web standard Request object
+    const url = `http://localhost:8080${req.url}`;
+    const requestInit = {
+      method: req.method,
+      headers: req.headers,
+    };
+    
+    if (body) {
+      requestInit.body = body;
+    }
+    
+    const request = new Request(url, requestInit);
+    
+    // Call the Web standard API handler
+    const response = await apiHandler.default(request);
+    
+    // Convert Web standard Response back to Node.js response
+    res.writeHead(response.status, Object.fromEntries(response.headers.entries()));
+    
+    if (response.body) {
+      const responseText = await response.text();
+      res.end(responseText);
+    } else {
+      res.end();
+    }
+  } catch (error) {
+    console.error(`API error for ${apiPath}:`, error);
+    res.writeHead(500, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ 
+      success: false, 
+      message: 'API服务暂时不可用: ' + error.message 
+    }));
+  }
+}
 
 const server = http.createServer(async (req, res) => {
   const parsedUrl = url.parse(req.url, true);
@@ -41,7 +94,25 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
-    if (pathname === '/api/payment' && req.method === 'POST') {
+    // Handle test-cjs endpoint using Web standard API
+    if (pathname === '/api/test-cjs') {
+      await callWebStandardAPI('./api/test-cjs.js', req, res);
+      return;
+    }
+
+    // Handle payment endpoint using Web standard API
+    if (pathname === '/api/payment') {
+      await callWebStandardAPI('./api/payment.js', req, res);
+      return;
+    }
+
+    // Handle payment-notify endpoint using Web standard API
+    if (pathname === '/api/payment-notify') {
+      await callWebStandardAPI('./api/payment-notify.js', req, res);
+      return;
+    }
+
+    if (pathname === '/api/payment-old' && req.method === 'POST') {
       let body = '';
       req.on('data', chunk => {
         body += chunk.toString();
@@ -147,6 +218,8 @@ server.listen(PORT, () => {
   console.log(`Development server running on http://localhost:${PORT}`);
   console.log('API endpoints available:');
   console.log('  GET /api/supabase-config');
+  console.log('  GET /api/test-cjs (Web Standard API)');
+  console.log('  POST /api/payment (Web Standard API)');
+  console.log('  POST /api/payment-notify (Web Standard API)');
   console.log('  POST /api/generate-prompt');
-  console.log('  POST /api/payment');
 });
