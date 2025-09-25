@@ -278,31 +278,61 @@ class PaymentManager {
 
     // 处理支付
     async handlePayment(planType, paymentMethod) {
+        const payButton = document.querySelector('.pay-button');
+        
         try {
             // 显示加载状态
-            const payButton = document.querySelector('.pay-button');
             if (payButton) {
                 payButton.textContent = '创建订单中...';
                 payButton.disabled = true;
             }
 
+            console.log('开始创建支付订单...', { planType, paymentMethod });
+
             // 创建支付订单
             const orderData = await this.createPaymentOrder(planType, paymentMethod);
             
+            console.log('支付订单创建结果:', orderData);
+            
             if (orderData && orderData.payment_url) {
+                // 更新按钮状态
+                if (payButton) {
+                    payButton.textContent = '正在跳转支付...';
+                }
+                
                 // 跳转到支付页面
                 window.open(orderData.payment_url, '_blank');
                 
                 // 开始轮询订单状态
                 this.pollOrderStatus(orderData.order_id);
+                
+                // 提示用户
+                setTimeout(() => {
+                    if (payButton) {
+                        payButton.textContent = '等待支付完成...';
+                    }
+                }, 1000);
+                
+            } else {
+                throw new Error('支付订单创建失败：未获取到支付链接');
             }
 
         } catch (error) {
-            alert('支付失败：' + error.message);
+            console.error('支付处理失败:', error);
+            
+            // 显示更友好的错误信息
+            let errorMessage = '支付失败：' + error.message;
+            if (error.message.includes('网络连接失败')) {
+                errorMessage = '网络连接失败，请检查网络后重试';
+            } else if (error.message.includes('服务器配置错误')) {
+                errorMessage = '服务暂时不可用，请稍后重试或联系客服';
+            }
+            
+            alert(errorMessage);
+            
         } finally {
-            // 恢复按钮状态
-            const payButton = document.querySelector('.pay-button');
-            if (payButton) {
+            // 恢复按钮状态（仅在出错时）
+            if (payButton && payButton.textContent !== '等待支付完成...') {
                 payButton.textContent = '立即支付';
                 payButton.disabled = false;
             }
@@ -312,22 +342,52 @@ class PaymentManager {
     // 轮询订单状态
     async pollOrderStatus(orderId, maxAttempts = 30) {
         let attempts = 0;
+        const payButton = document.querySelector('.pay-button');
         
         const poll = async () => {
             if (attempts >= maxAttempts) {
                 console.log('Order status polling timeout');
+                
+                // 超时后恢复按钮状态
+                if (payButton) {
+                    payButton.textContent = '立即支付';
+                    payButton.disabled = false;
+                }
+                
+                alert('支付状态查询超时，请手动刷新页面查看会员状态，或联系客服确认支付结果');
                 return;
             }
 
-            const status = await this.queryOrderStatus(orderId);
-            
-            if (status && status.status === 1) {
-                // 支付成功
-                await this.loadSubscription();
-                this.updateUI();
-                this.hideUpgradeModal();
-                alert('支付成功！您已成为高级会员');
-                return;
+            try {
+                const status = await this.queryOrderStatus(orderId);
+                console.log(`订单状态查询 (${attempts + 1}/${maxAttempts}):`, status);
+                
+                if (status && status.status === 1) {
+                    // 支付成功
+                    console.log('支付成功，更新用户状态');
+                    
+                    if (payButton) {
+                        payButton.textContent = '支付成功';
+                        payButton.disabled = true;
+                    }
+                    
+                    await this.loadSubscription();
+                    this.updateUI();
+                    this.hideUpgradeModal();
+                    alert('支付成功！您已成为高级会员');
+                    
+                    // 恢复按钮状态
+                    setTimeout(() => {
+                        if (payButton) {
+                            payButton.textContent = '立即支付';
+                            payButton.disabled = false;
+                        }
+                    }, 2000);
+                    
+                    return;
+                }
+            } catch (error) {
+                console.error('查询订单状态失败:', error);
             }
 
             attempts++;

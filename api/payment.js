@@ -78,13 +78,24 @@ export default async function handler(request) {
           }), { status: 400, headers });
         }
 
+        // 获取origin，处理本地开发环境
+        let origin = request.headers.get('origin');
+        if (!origin) {
+            const host = request.headers.get('host');
+            if (host) {
+                origin = `http://${host}`;
+            } else {
+                origin = 'http://localhost:8080';
+            }
+        }
+        
         // 构建支付参数
         const paymentParams = {
           pid: MAPAY_MERCHANT_ID,
           type: type,
           out_trade_no: out_trade_no,
-          notify_url: notify_url || `${request.headers.get('origin')}/api/payment-notify`,
-          return_url: return_url || `${request.headers.get('origin')}/payment-success.html`,
+          notify_url: notify_url || `${origin}/api/payment-notify`,
+          return_url: return_url || `${origin}/payment-success.html`,
           name: name,
           money: amount,
           sitename: 'AI商品描述生成器'

@@ -31,9 +31,20 @@ async function callWebStandardAPI(apiPath, req, res) {
     
     // Create Web standard Request object
     const url = `http://localhost:8080${req.url}`;
+    
+    // Convert Node.js headers to Web standard headers
+    const headers = new Headers();
+    for (const [key, value] of Object.entries(req.headers)) {
+      if (Array.isArray(value)) {
+        value.forEach(v => headers.append(key, v));
+      } else {
+        headers.set(key, value);
+      }
+    }
+    
     const requestInit = {
       method: req.method,
-      headers: req.headers,
+      headers: headers,
     };
     
     if (body) {
