@@ -6,7 +6,7 @@ const url = require('url');
 // Load environment variables
 require('dotenv').config();
 
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
   const parsedUrl = url.parse(req.url, true);
   const pathname = parsedUrl.pathname;
 
@@ -28,17 +28,59 @@ const server = http.createServer((req, res) => {
       const supabaseUrl = process.env.SUPABASE_URL;
       const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
 
-      if (!supabaseUrl || !supabaseAnonKey) {
-        res.writeHead(500, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: 'Supabase configuration not found' }));
-        return;
-      }
-
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
         supabaseUrl,
         supabaseAnonKey
       }));
+      return;
+    }
+
+    if (pathname === '/api/payment' && req.method === 'POST') {
+      let body = '';
+      req.on('data', chunk => {
+        body += chunk.toString();
+      });
+      req.on('end', async () => {
+        try {
+          // Import the payment handler dynamically
+          const paymentHandler = await import('./api/payment.js');
+          
+          // Create a mock request/response object for the handler
+          const mockReq = {
+            method: 'POST',
+            body: JSON.parse(body),
+            ...JSON.parse(body)
+          };
+          
+          const mockRes = {
+            status: (code) => ({
+              json: (data) => {
+                res.writeHead(code, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify(data));
+              },
+              end: () => {
+                res.writeHead(code);
+                res.end();
+              }
+            }),
+            setHeader: (name, value) => res.setHeader(name, value),
+            json: (data) => {
+              res.writeHead(200, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify(data));
+            }
+          };
+          
+          await paymentHandler.default(mockReq, mockRes);
+        } catch (error) {
+          console.error('Payment API error:', error);
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ 
+            success: false, 
+            message: '支付服务暂时不可用: ' + error.message 
+          }));
+        }
+      });
       return;
     }
 
@@ -98,4 +140,5 @@ server.listen(PORT, () => {
   console.log('API endpoints available:');
   console.log('  GET /api/supabase-config');
   console.log('  POST /api/generate-prompt');
+  console.log('  POST /api/payment');
 });

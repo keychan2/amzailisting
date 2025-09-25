@@ -15,17 +15,36 @@ class PaymentManager {
 
     // 加载用户认证信息
     async loadUserAuth() {
-        // 首先检查全局的 currentUser (来自 Supabase 认证)
+        // 方法1：检查全局的 currentUser (来自 Supabase 认证)
         if (window.currentUser) {
             this.currentUser = {
                 id: window.currentUser.id,
                 email: window.currentUser.email,
-                token: window.currentUser.id // 使用用户ID作为token
+                token: window.currentUser.token || window.currentUser.id
             };
+            console.log('PaymentManager: 从 window.currentUser 加载用户信息', this.currentUser);
             return;
         }
 
-        // 备用方案：检查 localStorage 中的 userToken
+        // 方法2：尝试从 Supabase 直接获取会话信息
+        try {
+            if (window.supabase) {
+                const { data: { session } } = await window.supabase.auth.getSession();
+                if (session && session.user) {
+                    this.currentUser = {
+                        id: session.user.id,
+                        email: session.user.email,
+                        token: session.access_token || session.user.id
+                    };
+                    console.log('PaymentManager: 从 Supabase session 加载用户信息', this.currentUser);
+                    return;
+                }
+            }
+        } catch (error) {
+            console.error('PaymentManager: 无法从 Supabase 获取会话信息:', error);
+        }
+
+        // 方法3：备用方案 - 检查 localStorage 中的 userToken
         const token = localStorage.getItem('userToken');
         if (token) {
             try {
@@ -39,11 +58,16 @@ class PaymentManager {
                 if (response.ok) {
                     const data = await response.json();
                     this.currentUser = { id: data.user_id, token };
+                    console.log('PaymentManager: 从 localStorage token 加载用户信息', this.currentUser);
                 }
             } catch (error) {
-                console.error('Failed to load user auth:', error);
+                console.error('PaymentManager: token 验证失败:', error);
                 localStorage.removeItem('userToken');
             }
+        }
+
+        if (!this.currentUser) {
+            console.log('PaymentManager: 未找到有效的用户认证信息');
         }
     }
 
@@ -167,6 +191,8 @@ class PaymentManager {
         };
 
         try {
+            console.log('Creating payment order with data:', orderData);
+            
             const response = await fetch('/api/payment', {
                 method: 'POST',
                 headers: {
@@ -175,7 +201,16 @@ class PaymentManager {
                 body: JSON.stringify(orderData)
             });
 
+            console.log('Payment API response status:', response.status);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Payment API error response:', errorText);
+                throw new Error(`HTTP ${response.status}: ${errorText}`);
+            }
+
             const result = await response.json();
+            console.log('Payment API result:', result);
             
             if (result.success) {
                 return result.data;
@@ -184,7 +219,15 @@ class PaymentManager {
             }
         } catch (error) {
             console.error('Failed to create payment order:', error);
-            throw error;
+            
+            // 提供更友好的错误信息
+            if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                throw new Error('网络连接失败，请检查网络连接后重试');
+            } else if (error.message.includes('HTTP 500')) {
+                throw new Error('服务器配置错误，请联系管理员');
+            } else {
+                throw error;
+            }
         }
     }
 
@@ -342,11 +385,21 @@ class PaymentManager {
     }
 
     // 确保用户已登录
-    ensureUserLoggedIn() {
+    async ensureUserLoggedIn() {
+        // 如果当前没有用户信息，尝试重新加载
         if (!this.currentUser) {
+            console.log('PaymentManager: 当前无用户信息，尝试重新加载...');
+            await this.loadUserAuth();
+        }
+        
+        // 再次检查用户信息
+        if (!this.currentUser) {
+            console.log('PaymentManager: 重新加载后仍无用户信息，显示登录提示');
             this.showLoginPrompt();
             return false;
         }
+        
+        console.log('PaymentManager: 用户已登录，可以继续支付操作', this.currentUser);
         return true;
     }
 }

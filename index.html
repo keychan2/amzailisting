@@ -943,6 +943,10 @@
         const config = await response.json();
         const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
         supabase = createClient(config.supabaseUrl, config.supabaseAnonKey);
+        
+        // 设置全局引用供其他模块使用
+        window.supabase = supabase;
+        
         return supabase;
       } catch (error) {
         console.error('API配置获取失败，尝试使用静态配置:', error);
@@ -954,6 +958,10 @@
             console.log('找到静态配置，开始初始化Supabase客户端');
             const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
             supabase = createClient(window.SUPABASE_CONFIG.supabaseUrl, window.SUPABASE_CONFIG.supabaseAnonKey);
+            
+            // 设置全局引用供其他模块使用
+            window.supabase = supabase;
+            
             console.log('使用静态配置成功初始化Supabase');
             return supabase;
           } else {
@@ -1039,6 +1047,13 @@
             // 用户已登录
             currentUser = session.user;
             
+            // 重要：同步设置 window.currentUser 供 PaymentManager 使用
+            window.currentUser = {
+                id: session.user.id,
+                email: session.user.email,
+                token: session.access_token || session.user.id
+            };
+            
             // 更新认证按钮为用户信息和退出按钮
             const authBtn = document.getElementById('auth-btn');
             if (authBtn) {
@@ -1048,6 +1063,9 @@
                     e.preventDefault();
                     const { error } = await supabase.auth.signOut();
                     if (!error) {
+                        // 清除全局用户状态
+                        window.currentUser = null;
+                        currentUser = null;
                         window.location.reload();
                     } else {
                         console.error('退出失败:', error);
@@ -1059,6 +1077,7 @@
         } else {
             // 用户未登录
             currentUser = null;
+            window.currentUser = null; // 清除全局用户状态
             
             // 恢复登录按钮
             const authBtn = document.getElementById('auth-btn');
@@ -1072,6 +1091,7 @@
         } catch (error) {
             console.error('检查用户会话失败:', error);
             currentUser = null;
+            window.currentUser = null;
         }
     }
 
@@ -1263,6 +1283,11 @@
         const method = payButton.dataset.method || 'alipay';
         
         if (window.paymentManager) {
+            // 确保用户已登录
+            if (!(await window.paymentManager.ensureUserLoggedIn())) {
+                return; // 用户未登录，停止支付流程
+            }
+            
             await window.paymentManager.handlePayment('monthly', method);
         }
     }
@@ -1272,7 +1297,7 @@
     generateListing = async function() {
         // 确保用户已登录
         if (window.paymentManager) {
-            if (!window.paymentManager.ensureUserLoggedIn()) {
+            if (!(await window.paymentManager.ensureUserLoggedIn())) {
                 return; // 用户未登录，停止执行
             }
             
